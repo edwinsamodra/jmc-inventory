@@ -25,6 +25,7 @@ dist-ssr
 
 .env
 .env.production
+backend/uploads
 
 # Briefing & specifications
 BRIEF.md
