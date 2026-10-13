@@ -37,8 +37,8 @@
         <div class="p-8 sm:p-12 printable-document font-serif text-slate-900 bg-white min-h-[500px]">
           <!-- Letterhead / Kop Surat -->
           <div class="border-b-2 border-slate-900 pb-4 mb-6 text-center">
-            <h2 class="text-2xl font-bold tracking-wide uppercase font-sans text-slate-900">ARRG LOGISTIK & PENGELOLAAN BARANG</h2>
-            <p class="text-xs text-slate-600 font-sans mt-0.5">Jl. Jenderal Sudirman No. 88, Kawasan Niaga Terpadu | Telp: (021) 555-8899 | Email: logistik@arrg.local</p>
+            <h2 class="text-2xl font-bold tracking-wide uppercase font-sans text-slate-900">JMC LOGISTIK & PENGELOLAAN BARANG</h2>
+            <p class="text-xs text-slate-600 font-sans mt-0.5">Jl. Jenderal Sudirman No. 88, Kawasan Niaga Terpadu | Telp: (021) 555-8899 | Email: logistik@jmc.co.id</p>
           </div>
 
           <div class="text-center mb-6">

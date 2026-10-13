@@ -3,11 +3,11 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="flex justify-center">
         <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-brand-500/30">
-          A
+          J
         </div>
       </div>
       <h2 class="mt-4 text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-        ARRG INVENTORY
+        JMC INVENTORY
       </h2>
       <p class="mt-1 text-center text-sm text-slate-500">
         Sistem Aplikasi Pengelolaan Barang Sederhana

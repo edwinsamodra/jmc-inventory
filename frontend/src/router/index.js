@@ -68,7 +68,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   // Update document title
-  document.title = to.meta.title ? `${to.meta.title} | Arrg Inventory` : 'Arrg - Pengelolaan Barang';
+  document.title = to.meta.title ? `${to.meta.title} | JMC Inventory` : 'JMC Inventory - Sistem Pengelolaan Barang';
 
   // Check auth
   if (!to.meta.public && !store.currentUser) {
