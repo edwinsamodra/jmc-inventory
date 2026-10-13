@@ -136,43 +136,6 @@
           </div>
         </form>
 
-        <!-- Divider -->
-        <div class="hr-text text-muted my-4">Akun Cepat (Quick Fill)</div>
-
-        <!-- Quick Demo Accounts Button Grid -->
-        <div class="row g-2 mb-3">
-          <div class="col-6">
-            <button
-              type="button"
-              @click="quickFill('admin', 'Password123')"
-              class="btn btn-outline-primary w-100 text-start p-2 rounded-2"
-            >
-              <div class="fw-bold small">Admin</div>
-              <div class="text-muted" style="font-size: 0.72rem;">admin / Password123</div>
-            </button>
-          </div>
-          <div class="col-6">
-            <button
-              type="button"
-              @click="quickFill('budi_op', 'Operator123')"
-              class="btn btn-outline-secondary w-100 text-start p-2 rounded-2"
-            >
-              <div class="fw-bold small">Operator</div>
-              <div class="text-muted" style="font-size: 0.72rem;">budi_op / Operator123</div>
-            </button>
-          </div>
-        </div>
-
-        <div class="text-center">
-          <button
-            type="button"
-            @click="quickFill('doni_lock', 'Operator123')"
-            class="btn btn-link btn-sm text-danger text-decoration-none p-0"
-            style="font-size: 0.75rem;"
-          >
-            Uji Coba Akun Terkunci (doni_lock)
-          </button>
-        </div>
       </div>
     </div>
 
@@ -256,11 +219,6 @@ onMounted(() => {
   document.body.setAttribute('data-bs-theme', 'light');
 });
 
-function quickFill(u, p) {
-  form.username = u;
-  form.password = p;
-  errorMessage.value = '';
-}
 
 async function handleLogin() {
   errorMessage.value = '';

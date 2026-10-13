@@ -26,26 +26,6 @@
 
       <!-- Right Navbar Nav -->
       <div class="navbar-nav flex-row order-md-last ms-md-auto align-items-center gap-2">
-        <!-- Role Switcher (Helper for instant Demo testing) -->
-        <div class="btn-group btn-group-sm me-2 d-none d-sm-flex" role="group">
-          <button
-            type="button"
-            @click="store.switchRole('Admin')"
-            class="btn py-1 px-2 fw-semibold"
-            :class="store.currentUser?.role === 'Admin' ? 'btn-primary' : 'btn-outline-secondary'"
-          >
-            Admin
-          </button>
-          <button
-            type="button"
-            @click="store.switchRole('Operator')"
-            class="btn py-1 px-2 fw-semibold"
-            :class="store.currentUser?.role === 'Operator' ? 'btn-primary' : 'btn-outline-secondary'"
-          >
-            Operator
-          </button>
-        </div>
-
         <!-- User Dropdown matching Header.vue in contoh_ui_jadi -->
         <div class="nav-item dropdown position-relative" ref="userDropdownRef">
           <a
@@ -75,16 +55,6 @@
               <div class="fw-bold text-dark">{{ store.currentUser?.nama }}</div>
               <div class="small text-secondary">@{{ store.currentUser?.username }} • {{ store.currentUser?.role }}</div>
             </div>
-
-            <div class="dropdown-divider"></div>
-
-            <a href="#" class="dropdown-item cursor-pointer" @click.prevent="resetMockData">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2 text-secondary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>Reset Data Mock</span>
-            </a>
 
             <div class="dropdown-divider"></div>
 
@@ -140,13 +110,6 @@ const handleLogout = async () => {
   isDropdownOpen.value = false;
   await store.logout();
   router.push('/login');
-};
-
-const resetMockData = () => {
-  isDropdownOpen.value = false;
-  if (confirm('Apakah Anda yakin ingin me-reset semua data ke kondisi awal?')) {
-    store.resetToDefault();
-  }
 };
 
 const handleClickOutside = (e) => {

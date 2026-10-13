@@ -4,48 +4,10 @@ import api, { setToken } from '../services/api';
 const TOKEN_KEY = 'arrg_jwt_token';
 const USER_KEY = 'arrg_current_user';
 
-// Fallback seed data in case backend is offline
-const fallbackKategori = [
-  { id: 1, kode: 'ATK', nama: 'Alat Tulis Kantor' },
-  { id: 2, kode: 'ELEC', nama: 'Elektronik & IT' },
-  { id: 3, kode: 'MED', nama: 'Peralatan Medis & K3' },
-  { id: 4, kode: 'FURN', nama: 'Furniture & Perabot' },
-  { id: 5, kode: 'KONS', nama: 'Konsumsi & Logistik Dapur' },
-  { id: 6, kode: 'KEBR', nama: 'Peralatan Kebersihan' },
-  { id: 7, kode: 'OTOM', nama: 'Suku Cadang & Otomotif' },
-  { id: 8, kode: 'BANG', nama: 'Material & Bangunan' },
-  { id: 9, kode: 'CETK', nama: 'Percetakan & Publikasi' },
-  { id: 10, kode: 'LAB', nama: 'Peralatan Laboratorium' },
-  { id: 11, kode: 'SRGM', nama: 'Seragam & Pakaian Kerja' },
-  { id: 12, kode: 'SEWA', nama: 'Perlengkapan Sewa & Event' }
-];
-
-const fallbackSubKategori = [
-  { id: 1, kategoriId: 1, nama: 'Kertas, Buku & Formulir', batasHarga: 5000000 },
-  { id: 2, kategoriId: 1, nama: 'Pulpen, Spidol & Alat Koreksi', batasHarga: 3000000 },
-  { id: 3, kategoriId: 1, nama: 'Tinta & Toner Printer', batasHarga: 15000000 },
-  { id: 4, kategoriId: 2, nama: 'Komputer, Laptop & Monitor', batasHarga: 60000000 },
-  { id: 5, kategoriId: 2, nama: 'Aksesoris & Perangkat Jaringan', batasHarga: 12000000 },
-  { id: 6, kategoriId: 2, nama: 'Software & Lisensi', batasHarga: 25000000 },
-  { id: 7, kategoriId: 3, nama: 'Masker, Hand Sanitizer & APD', batasHarga: 8000000 },
-  { id: 8, kategoriId: 3, nama: 'Kotak P3K & Obat Pertolongan Pertama', batasHarga: 4000000 },
-  { id: 9, kategoriId: 4, nama: 'Meja & Kursi Ergonomis', batasHarga: 35000000 },
-  { id: 10, kategoriId: 4, nama: 'Lemari Arsip & Rak Dokumen', batasHarga: 18000000 },
-  { id: 11, kategoriId: 5, nama: 'Kopi, Teh, Gula & Snack Kantor', batasHarga: 3000000 },
-  { id: 12, kategoriId: 6, nama: 'Sabun, Disinfektan & Pembersih Lantai', batasHarga: 4500000 },
-  { id: 13, kategoriId: 7, nama: 'Oli Mesin, Minyak Rem & Aki', batasHarga: 9000000 },
-  { id: 14, kategoriId: 8, nama: 'Cat Tembok & Perlengkapan Perbaikan', batasHarga: 7500000 }
-];
-
-const fallbackUsers = [
-  { id: 1, role: 'Admin', username: 'admin', nama: 'Super Administrator', email: 'admin@arrg.local', isLocked: false },
-  { id: 2, role: 'Operator', username: 'budi_op', nama: 'Budi Santoso', email: 'budi.santoso@arrg.local', isLocked: false },
-  { id: 3, role: 'Operator', username: 'siti_op', nama: 'Siti Rahmawati', email: 'siti.rahma@arrg.local', isLocked: false },
-  { id: 4, role: 'Operator', username: 'doni_lock', nama: 'Doni Prasetyo (Locked Demo)', email: 'doni.prasetyo@arrg.local', isLocked: true }
-];
-
 function getSavedUser() {
   try {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return null;
     const raw = localStorage.getItem(USER_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
@@ -54,17 +16,10 @@ function getSavedUser() {
 }
 
 export const store = reactive({
-  currentUser: getSavedUser() || {
-    id: 1,
-    role: 'Admin',
-    username: 'admin',
-    nama: 'Super Administrator',
-    email: 'admin@arrg.local',
-    isLocked: false
-  },
-  kategoriList: [...fallbackKategori],
-  subKategoriList: [...fallbackSubKategori],
-  userList: [...fallbackUsers],
+  currentUser: getSavedUser(),
+  kategoriList: [],
+  subKategoriList: [],
+  userList: [],
   get usersList() {
     return this.userList || [];
   },
@@ -87,30 +42,34 @@ export const store = reactive({
     }, 3500);
   },
 
-  // Inisialisasi data dari backend REST API
+  // Inisialisasi sesi pengguna dan data dari backend REST API
   async init() {
     const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      try {
-        const meRes = await api.auth.me();
-        if (meRes.success && meRes.data) {
-          this.currentUser = meRes.data;
-          localStorage.setItem(USER_KEY, JSON.stringify(meRes.data));
-        }
-      } catch (err) {
-        console.warn('Sesi kedaluwarsa atau token tidak valid:', err.message);
-        if (err.statusCode === 401 || err.statusCode === 403) {
-          this.logout();
-        }
-      }
+    if (!token) {
+      this.currentUser = null;
+      return;
     }
 
-    await this.loadAllData();
+    try {
+      const meRes = await api.auth.me();
+      if (meRes.success && meRes.data) {
+        this.currentUser = meRes.data;
+        localStorage.setItem(USER_KEY, JSON.stringify(meRes.data));
+        await this.loadAllData();
+      } else {
+        await this.logout();
+      }
+    } catch (err) {
+      console.warn('Sesi tidak valid atau kedaluwarsa:', err.message);
+      await this.logout();
+    }
   },
 
-  // Memuat data lengkap dari backend
+  // Memuat data lengkap dari backend database MariaDB
   async loadAllData() {
+    if (!this.currentUser) return;
     this.isLoading = true;
+
     try {
       // 1. Kategori
       try {
@@ -132,7 +91,7 @@ export const store = reactive({
         console.warn('Gagal memuat sub kategori dari backend:', e.message);
       }
 
-      // 3. User List (hanya jika Admin)
+      // 3. User List (khusus Admin)
       if (this.currentUser?.role === 'Admin') {
         try {
           const userRes = await api.users.getAll({ limit: 100 });
@@ -159,7 +118,7 @@ export const store = reactive({
   },
 
   // ==========================================
-  // AUTHENTICATION
+  // AUTENTIKASI REAL USER
   // ==========================================
   async login(username, password) {
     try {
@@ -167,7 +126,7 @@ export const store = reactive({
       if (res.success && res.data) {
         this.currentUser = res.data.user;
         localStorage.setItem(USER_KEY, JSON.stringify(res.data.user));
-        // Sinkronisasi data setelah login berhasil
+        // Sinkronisasi data dari MariaDB setelah login berhasil
         await this.loadAllData();
         return { success: true, user: this.currentUser };
       }
@@ -189,6 +148,10 @@ export const store = reactive({
       setToken(null);
       localStorage.removeItem(USER_KEY);
       this.currentUser = null;
+      this.kategoriList = [];
+      this.subKategoriList = [];
+      this.userList = [];
+      this.barangMasukList = [];
     }
   },
 
