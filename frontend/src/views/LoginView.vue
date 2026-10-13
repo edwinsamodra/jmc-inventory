@@ -1,156 +1,260 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50/40 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <div class="flex justify-center">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-brand-500/30">
-          J
-        </div>
-      </div>
-      <h2 class="mt-4 text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-        JMC INVENTORY
-      </h2>
-      <p class="mt-1 text-center text-sm text-slate-500">
-        Sistem Aplikasi Pengelolaan Barang Sederhana
-      </p>
-    </div>
+  <div class="page-login d-flex flex-column flex-lg-row w-100" data-bs-theme="light">
+    <!-- Left: Login Form Section -->
+    <div class="loginbox col-12 col-lg-5 d-flex align-items-center justify-content-center p-4 p-md-5 overflow-y-auto">
+      <div class="w-100" style="max-width: 440px;">
+        <!-- Logo and Branding Header identical to contoh_ui_jadi -->
+        <div class="d-flex gap-3 mb-4 align-items-center">
+          <div class="logo">
+            <img
+              :src="logoJmcBlack"
+              alt="Logo JMC"
+              height="36"
+              class="d-inline-block"
+            />
+          </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-      <div class="bg-white py-8 px-6 sm:px-10 shadow-xl shadow-slate-200/50 rounded-2xl border border-slate-100">
+          <div class="logo-text">
+            <h1 class="h3 mb-0 fw-bold text-primary">JMC INVENTORY</h1>
+            <div class="text-secondary small fw-medium">Sistem Pengelolaan Barang</div>
+          </div>
+        </div>
+
+        <p class="text-muted mb-4">
+          Selamat Datang, silahkan masukkan username dan password Anda!
+        </p>
+
         <!-- Error Alert -->
-        <div v-if="errorMessage" class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start space-x-2">
-          <svg class="w-4 h-4 mt-0.5 text-rose-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div v-if="errorMessage" class="alert alert-danger alert-dismissible mb-3 d-flex align-items-center" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon me-2 flex-shrink-0" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <circle cx="12" cy="12" r="9" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <span>{{ errorMessage }}</span>
+          <div class="small fw-medium">{{ errorMessage }}</div>
         </div>
 
-        <form class="space-y-5" @submit.prevent="handleLogin">
-          <div>
-            <label for="username" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
-              Username <span class="text-rose-500">*</span>
+        <!-- Form Login -->
+        <form id="login-form" @submit.prevent="handleLogin">
+          <!-- Username / Identifier -->
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">
+              Username <span class="text-danger">*</span>
             </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7 7z" />
+            <div class="input-icon">
+              <span class="input-icon-addon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon text-muted" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <circle cx="12" cy="7" r="4" />
+                  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
                 </svg>
-              </div>
+              </span>
               <input
-                id="username"
                 v-model="form.username"
                 type="text"
-                required
-                autocomplete="username"
+                class="form-control py-3 bg-light text-dark"
                 placeholder="Masukkan username Anda"
-                class="block w-full pl-10 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
+                autocomplete="username"
+                required
+                :disabled="loading"
               />
             </div>
           </div>
 
-          <div>
-            <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
-              Password <span class="text-rose-500">*</span>
+          <!-- Password -->
+          <div class="mb-3">
+            <label class="form-label text-muted small mb-1">
+              Password <span class="text-danger">*</span>
             </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            <div class="input-icon has-end-addon">
+              <span class="input-icon-addon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon text-muted" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <rect x="5" y="11" width="14" height="10" rx="2" />
+                  <circle cx="12" cy="16" r="1" />
+                  <path d="M8 11v-4a4 4 0 0 1 8 0v4" />
                 </svg>
-              </div>
+              </span>
               <input
-                id="password"
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
-                required
+                class="form-control py-3 bg-light text-dark"
+                placeholder="Password"
                 autocomplete="current-password"
-                placeholder="Masukkan password Anda"
-                class="block w-full pl-10 pr-10 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
+                required
+                :disabled="loading"
               />
-              <button
-                type="button"
+              <span
+                class="input-icon-addon input-icon-addon-end"
                 @click="showPassword = !showPassword"
-                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+                title="Tampilkan / Sembunyikan Password"
               >
-                <svg v-if="!showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" class="icon text-muted" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <circle cx="12" cy="12" r="2" />
+                  <path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7" />
                 </svg>
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="icon text-muted" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <line x1="3" y1="3" x2="21" y2="21" />
+                  <path d="M10.584 10.587a2 2 0 0 0 2.828 2.83" />
+                  <path d="M9.363 5.365a9.466 9.466 0 0 1 2.637 -.365c4 0 7.333 2.333 10 7c-.778 1.361 -1.612 2.524 -2.503 3.488m-2.14 1.861c-1.631 1.026 -3.415 1.651 -5.357 1.651c-4 0 -7.333 -2.333 -10 -7c1.369 -2.396 2.913 -4.175 4.632 -5.341" />
                 </svg>
-              </button>
+              </span>
             </div>
           </div>
 
-          <div>
+          <!-- Remember Me Checkbox -->
+          <div class="mb-3 d-flex justify-content-between align-items-center">
+            <label class="form-check m-0">
+              <input
+                v-model="rememberMe"
+                type="checkbox"
+                class="form-check-input"
+                :disabled="loading"
+              />
+              <span class="form-check-label text-muted small">Remember Me</span>
+            </label>
+            <span class="text-muted small">v1.0.0</span>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid mt-4">
             <button
+              class="btn btn-primary text-uppercase shadow py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
               type="submit"
               :disabled="loading"
-              class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition duration-150 disabled:opacity-50"
             >
-              <svg v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-              </svg>
-              <span>{{ loading ? 'Memproses...' : 'Masuk ke Aplikasi' }}</span>
+              <span
+                v-if="loading"
+                class="spinner-border spinner-border-sm"
+                role="status"
+              ></span>
+              <span>{{ loading ? "Memverifikasi..." : "Masuk" }}</span>
             </button>
           </div>
         </form>
 
-        <!-- Quick Demo Login Switchers -->
-        <div class="mt-6 pt-6 border-t border-slate-100">
-          <p class="text-2xs font-semibold uppercase tracking-wider text-slate-400 text-center mb-3">
-            Akun Demo Pengujian Cepat
-          </p>
-          <div class="grid grid-cols-2 gap-2 text-xs">
+        <!-- Divider -->
+        <div class="hr-text text-muted my-4">Akun Cepat (Quick Fill)</div>
+
+        <!-- Quick Demo Accounts Button Grid -->
+        <div class="row g-2 mb-3">
+          <div class="col-6">
             <button
               type="button"
               @click="quickFill('admin', 'Password123')"
-              class="p-2 border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl transition text-left"
+              class="btn btn-outline-primary w-100 text-start p-2 rounded-2"
             >
-              <div class="font-bold">Role: Admin</div>
-              <div class="text-2xs text-purple-600 mt-0.5">admin / Password123</div>
+              <div class="fw-bold small">Admin</div>
+              <div class="text-muted" style="font-size: 0.72rem;">admin / Password123</div>
             </button>
+          </div>
+          <div class="col-6">
             <button
               type="button"
               @click="quickFill('budi_op', 'Operator123')"
-              class="p-2 border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition text-left"
+              class="btn btn-outline-secondary w-100 text-start p-2 rounded-2"
             >
-              <div class="font-bold">Role: Operator</div>
-              <div class="text-2xs text-blue-600 mt-0.5">budi_op / Operator123</div>
-            </button>
-          </div>
-
-          <div class="mt-2 text-center">
-            <button
-              type="button"
-              @click="quickFill('doni_lock', 'Operator123')"
-              class="text-2xs text-slate-400 hover:text-rose-600 underline"
-            >
-              Uji Coba Login User Terkunci (doni_lock)
+              <div class="fw-bold small">Operator</div>
+              <div class="text-muted" style="font-size: 0.72rem;">budi_op / Operator123</div>
             </button>
           </div>
         </div>
+
+        <div class="text-center">
+          <button
+            type="button"
+            @click="quickFill('doni_lock', 'Operator123')"
+            class="btn btn-link btn-sm text-danger text-decoration-none p-0"
+            style="font-size: 0.75rem;"
+          >
+            Uji Coba Akun Terkunci (doni_lock)
+          </button>
+        </div>
       </div>
+    </div>
+
+    <!-- Right: Swiper Cover Section identical to contoh_ui_jadi auth layout -->
+    <div class="login-cover bg-dark col-lg-7 d-none d-lg-block position-relative">
+      <Swiper
+        :modules="[Autoplay, Pagination, Navigation]"
+        :loop="true"
+        :autoplay="{
+          delay: 4500,
+          disableOnInteraction: false,
+        }"
+        :pagination="{
+          clickable: true,
+        }"
+        :navigation="true"
+        class="w-100 h-100 position-absolute inset-0"
+      >
+        <SwiperSlide class="position-relative w-100 h-100">
+          <img
+            :src="work01"
+            alt="Work Cover 1"
+            class="cover"
+          />
+          <div class="position-absolute bottom-0 start-0 p-5 text-white" style="z-index: 3;">
+            <div class="badge bg-warning text-dark mb-2 px-3 py-2 fw-bold text-uppercase">JMC Inventory Management</div>
+            <h2 class="display-6 fw-bold mb-2 text-white">Kelola Transaksi Barang Masuk</h2>
+            <p class="text-white-50 lead fs-6 mb-0">
+              Pencatatan barang masuk cepat, validasi batas harga sub-kategori realtime, dan cetak surat penerimaan resmi.
+            </p>
+          </div>
+        </SwiperSlide>
+
+        <SwiperSlide class="position-relative w-100 h-100">
+          <img
+            :src="work02"
+            alt="Work Cover 2"
+            class="cover"
+          />
+          <div class="position-absolute bottom-0 start-0 p-5 text-white" style="z-index: 3;">
+            <div class="badge bg-primary mb-2 px-3 py-2 fw-bold text-uppercase">Master Data & User Security</div>
+            <h2 class="display-6 fw-bold mb-2 text-white">Kontrol Hak Akses Ketat</h2>
+            <p class="text-white-50 lead fs-6 mb-0">
+              Hak akses Admin dan Operator terintegrasi dengan proteksi akun terkunci dan master data dinamis.
+            </p>
+          </div>
+        </SwiperSlide>
+      </Swiper>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { store } from '../store/mockStore';
+
+import logoJmcBlack from '../assets/images/logo/logo_jmc_black.png';
+import work01 from '../assets/images/login/work01.jpeg';
+import work02 from '../assets/images/login/work02.jpeg';
+
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 
 const router = useRouter();
 
 const form = reactive({
   username: '',
-  password: ''
+  password: '',
 });
 
+const rememberMe = ref(false);
 const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
+
+onMounted(() => {
+  document.body.setAttribute('data-bs-theme', 'light');
+});
 
 function quickFill(u, p) {
   form.username = u;
@@ -171,6 +275,14 @@ function handleLogin() {
     } else {
       errorMessage.value = res.message;
     }
-  }, 300);
+  }, 350);
 }
 </script>
+
+<style scoped>
+.cover {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+}
+</style>
