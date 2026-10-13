@@ -1,50 +1,44 @@
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" @click="$emit('cancel')"></div>
-
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-      <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-100 p-6">
-        <div class="sm:flex sm:items-start">
-          <div
-            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl sm:mx-0 sm:h-10 sm:w-10"
-            :class="danger ? 'bg-rose-100 text-rose-600' : 'bg-brand-100 text-brand-600'"
-          >
-            <svg v-if="danger" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <svg v-else class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-            <h3 class="text-lg leading-6 font-semibold text-slate-800" id="modal-title">
-              {{ title }}
-            </h3>
-            <div class="mt-2">
-              <p class="text-sm text-slate-500">
-                {{ message }}
-              </p>
+  <div v-if="show" class="modal modal-blur fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+      <div class="modal-content shadow-lg">
+        <button type="button" class="btn-close" aria-label="Close" @click="$emit('cancel')"></button>
+        <div class="modal-status" :class="danger ? 'bg-danger' : 'bg-primary'"></div>
+        <div class="modal-body text-center py-4">
+          <svg v-if="danger" xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M12 9v2m0 4v.01" />
+            <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-primary icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <circle cx="12" cy="12" r="9" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+            <polyline points="11 12 12 12 12 16 13 16" />
+          </svg>
+          <h3 class="fw-bold">{{ title }}</h3>
+          <div class="text-secondary small">{{ message }}</div>
+        </div>
+        <div class="modal-footer">
+          <div class="w-100">
+            <div class="row g-2">
+              <div class="col">
+                <button type="button" class="btn btn-outline-secondary w-100" @click="$emit('cancel')">
+                  {{ cancelText || 'Batal' }}
+                </button>
+              </div>
+              <div class="col">
+                <button
+                  type="button"
+                  class="btn w-100"
+                  :class="danger ? 'btn-danger' : 'btn-primary'"
+                  @click="$emit('confirm')"
+                >
+                  {{ confirmText || 'Konfirmasi' }}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="mt-6 sm:mt-5 sm:flex sm:flex-row-reverse gap-3">
-          <button
-            type="button"
-            class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-xs px-4 py-2.5 text-sm font-semibold text-white transition focus:outline-none sm:w-auto"
-            :class="danger ? 'bg-rose-600 hover:bg-rose-700' : 'bg-brand-600 hover:bg-brand-700'"
-            @click="$emit('confirm')"
-          >
-            {{ confirmText || 'Konfirmasi' }}
-          </button>
-          <button
-            type="button"
-            class="mt-3 w-full inline-flex justify-center rounded-xl border border-slate-300 shadow-xs px-4 py-2.5 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none sm:mt-0 sm:w-auto"
-            @click="$emit('cancel')"
-          >
-            {{ cancelText || 'Batal' }}
-          </button>
         </div>
       </div>
     </div>

@@ -1,31 +1,28 @@
 <template>
-  <div class="h-screen flex flex-col bg-slate-50 text-slate-800 font-sans overflow-hidden">
-    <!-- Login Route Layout (Self-contained scroll if needed) -->
-    <div v-if="isLoginRoute" class="flex-1 overflow-y-auto flex flex-col">
+  <div class="page">
+    <!-- Login Route (Auth Layout identical to Nuxt auth.vue) -->
+    <template v-if="isLoginRoute">
       <RouterView />
-    </div>
+    </template>
 
-    <!-- Main Dashboard Layout -->
-    <div v-else class="h-screen flex flex-col overflow-hidden">
-      <!-- Fixed Top Navbar (h-16) -->
-      <Navbar @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+    <!-- Main Dashboard Layout (identical to Nuxt default.vue) -->
+    <template v-else>
+      <Sidebar />
 
-      <!-- Fixed Body Container below Navbar -->
-      <div class="flex-1 flex pt-16 overflow-hidden relative">
-        <!-- Fixed Sidebar (width 64 = 16rem) -->
-        <Sidebar
-          :is-open="sidebarOpen"
-          @close="sidebarOpen = false"
-        />
+      <div class="page-wrapper">
+        <Navbar @toggle-mobile-sidebar="sidebarOpen = !sidebarOpen" />
 
-        <!-- Main Content Area: Fixed to right side of Sidebar, with internal independent scrolling -->
-        <main class="flex-1 lg:pl-64 h-full overflow-y-auto">
-          <div class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <div class="page-body">
+          <div class="container-xl">
+            <!-- Breadcrumb Navigation (hanya jika halaman tidak memiliki custom header) -->
+            <AppBreadcrumb v-if="!['BarangMasukList', 'MasterKategori', 'MasterSubKategori', 'ManajemenUser'].includes(route.name)" />
+
+            <!-- Page View Content -->
             <RouterView />
           </div>
-        </main>
+        </div>
       </div>
-    </div>
+    </template>
 
     <!-- Global Toast Component -->
     <Toast />
@@ -33,14 +30,19 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Navbar from './components/Navbar.vue';
 import Sidebar from './components/Sidebar.vue';
+import AppBreadcrumb from './components/AppBreadcrumb.vue';
 import Toast from './components/Toast.vue';
-
 const route = useRoute();
 const sidebarOpen = ref(false);
+
+onMounted(() => {
+  document.body.setAttribute('data-bs-theme', 'light');
+  localStorage.setItem('theme', 'light');
+});
 
 const isLoginRoute = computed(() => {
   return route.name === 'Login';

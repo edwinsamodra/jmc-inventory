@@ -1,57 +1,105 @@
 <template>
-  <header class="bg-white border-b border-slate-200 fixed top-0 inset-x-0 h-16 z-30 shadow-xs select-none">
-    <div class="px-4 sm:px-6 lg:px-8 h-full">
-      <div class="flex items-center justify-between h-full">
-        <!-- Left: Mobile Menu Button & App Brand -->
-        <div class="flex items-center space-x-3">
-          <button
-            @click="$emit('toggle-sidebar')"
-            class="lg:hidden text-slate-500 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 focus:outline-none transition"
-            aria-label="Toggle menu"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+  <header class="navbar navbar-expand-lg d-print-none sticky-top" id="navbar">
+    <div class="container-xl justify-content-between">
+      <div class="d-flex align-items-center">
+        <!-- Desktop Sidebar Toggler -->
+        <button
+          class="sidebar-toggler d-none d-lg-block me-3"
+          type="button"
+          @click="toggleSidebar()"
+          title="Toggle Sidebar"
+        >
+          <span class="sidebar-icon"></span>
+        </button>
 
-          <RouterLink to="/barang-masuk" class="flex items-center space-x-2.5 group">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-lg shadow-sm group-hover:shadow-md transition">
-              J
-            </div>
-            <div class="flex flex-col">
-              <span class="text-base sm:text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-none">
-                JMC Inventory
-              </span>
-              <span class="text-2xs font-medium text-slate-400 mt-0.5">Sistem Pengelolaan Barang</span>
-            </div>
-          </RouterLink>
+        <!-- Mobile Offcanvas Toggler -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#sidebar-menu"
+          @click="$emit('toggle-mobile-sidebar')"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+
+      <!-- Right Navbar Nav -->
+      <div class="navbar-nav flex-row order-md-last ms-md-auto align-items-center gap-2">
+        <!-- Role Switcher (Helper for instant Demo testing) -->
+        <div class="btn-group btn-group-sm me-2 d-none d-sm-flex" role="group">
+          <button
+            type="button"
+            @click="store.switchRole('Admin')"
+            class="btn py-1 px-2 fw-semibold"
+            :class="store.currentUser?.role === 'Admin' ? 'btn-primary' : 'btn-outline-secondary'"
+          >
+            Admin
+          </button>
+          <button
+            type="button"
+            @click="store.switchRole('Operator')"
+            class="btn py-1 px-2 fw-semibold"
+            :class="store.currentUser?.role === 'Operator' ? 'btn-primary' : 'btn-outline-secondary'"
+          >
+            Operator
+          </button>
         </div>
 
-        <!-- Right: Fast Role Switcher & System Status -->
-        <div class="flex items-center space-x-3 sm:space-x-4">
-          <!-- Role Switcher (Helper for UI test) -->
-          <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-medium border border-slate-200/60">
-            <span class="text-slate-500 px-2 hidden sm:inline-block">Peran Aktif:</span>
-            <button
-              @click="store.switchRole('Admin')"
-              :class="store.currentUser?.role === 'Admin' ? 'bg-white text-brand-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
-              class="px-2.5 py-1 rounded-lg transition text-xs"
+        <!-- User Dropdown matching Header.vue in contoh_ui_jadi -->
+        <div class="nav-item dropdown position-relative" ref="userDropdownRef">
+          <a
+            href="#"
+            class="nav-link d-flex lh-1 text-reset p-0 dropdown-toggle cursor-pointer"
+            :class="{ show: isDropdownOpen }"
+            @click.prevent="toggleUserDropdown"
+          >
+            <span
+              class="avatar rounded-circle shadow-sm text-white fw-bold d-flex align-items-center justify-content-center"
+              :class="isAdmin ? 'bg-purple' : 'bg-primary'"
             >
-              Admin
-            </button>
-            <button
-              @click="store.switchRole('Operator')"
-              :class="store.currentUser?.role === 'Operator' ? 'bg-white text-brand-700 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900'"
-              class="px-2.5 py-1 rounded-lg transition ml-1 text-xs"
-            >
-              Operator
-            </button>
-          </div>
+              {{ initials }}
+            </span>
+            <div class="d-none d-xl-block ps-2 text-start">
+              <div class="fw-bold">{{ store.currentUser?.nama || "Pengguna" }}</div>
+              <div class="mt-1 small text-primary fw-semibold">{{ store.currentUser?.role }}</div>
+            </div>
+          </a>
 
-          <!-- Environment Badge -->
-          <div class="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-2xs font-semibold">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Online</span>
+          <div
+            class="dropdown-menu dropdown-menu-end dropdown-menu-arrow shadow"
+            :class="{ show: isDropdownOpen }"
+            :style="isDropdownOpen ? 'display: block; position: absolute; top: 100%; right: 0; margin-top: 0.5rem; z-index: 1050; min-width: 200px;' : 'display: none;'"
+          >
+            <div class="dropdown-header">
+              <div class="fw-bold text-dark">{{ store.currentUser?.nama }}</div>
+              <div class="small text-secondary">@{{ store.currentUser?.username }} • {{ store.currentUser?.role }}</div>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <a href="#" class="dropdown-item cursor-pointer" @click.prevent="resetMockData">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2 text-secondary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>Reset Data Mock</span>
+            </a>
+
+            <div class="dropdown-divider"></div>
+
+            <button
+              @click="handleLogout"
+              type="button"
+              class="dropdown-item text-danger border-0 bg-transparent w-100 text-start cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2 text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                <path d="M7 12h14l-3 -3m0 6l3 -3" />
+              </svg>
+              <span>Keluar (Logout)</span>
+            </button>
           </div>
         </div>
       </div>
@@ -60,8 +108,62 @@
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { store } from '../store/mockStore';
+import { useSidebar } from '../utils/useSidebar';
 
-defineEmits(['toggle-sidebar']);
+defineEmits(['toggle-mobile-sidebar']);
+
+const router = useRouter();
+const { toggleSidebar } = useSidebar();
+
+const isDropdownOpen = ref(false);
+const userDropdownRef = ref(null);
+
+const isAdmin = computed(() => store.currentUser?.role === 'Admin');
+
+const initials = computed(() => {
+  if (!store.currentUser?.nama) return 'U';
+  const parts = store.currentUser.nama.trim().split(' ');
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0].substring(0, 2).toUpperCase();
+});
+
+const toggleUserDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+const handleLogout = () => {
+  isDropdownOpen.value = false;
+  store.logout();
+  router.push('/login');
+};
+
+const resetMockData = () => {
+  isDropdownOpen.value = false;
+  if (confirm('Apakah Anda yakin ingin me-reset semua data ke kondisi awal?')) {
+    store.resetToDefault();
+  }
+};
+
+const handleClickOutside = (e) => {
+  if (userDropdownRef.value && !userDropdownRef.value.contains(e.target)) {
+    isDropdownOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    document.addEventListener('click', handleClickOutside);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    document.removeEventListener('click', handleClickOutside);
+  }
+});
 </script>
