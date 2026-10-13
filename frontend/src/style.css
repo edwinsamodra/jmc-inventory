@@ -1,28 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "@tabler/core/dist/css/tabler.min.css";
+@import "./assets/css/backend.css";
+@import "./assets/css/main.css";
+@import "./assets/css/login.css";
 
-@layer base {
-  body {
-    @apply bg-slate-50 text-slate-800 antialiased min-h-screen font-sans;
-  }
-}
-
-/* Custom scrollbar for clean UI */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
+/* Tambahan styling pelengkap murni Tabler tanpa dependensi Tailwind */
 
 /* Print styles for Bukti Penerimaan Barang */
 @media print {
@@ -30,6 +11,7 @@
     background: #ffffff !important;
     color: #000000 !important;
   }
+  .d-print-none,
   .no-print {
     display: none !important;
   }
@@ -42,3 +24,45 @@
     border: none !important;
   }
 }
+
+/* Modal and backdrop z-index fix */
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+/* Input Icon & Addon perfect vertical centering */
+.input-icon {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.input-icon .input-icon-addon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.input-icon .input-icon-addon.input-icon-addon-end {
+  left: auto;
+  right: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.input-icon .form-control {
+  padding-left: 2.75rem;
+}
+
+.input-icon.has-end-addon .form-control {
+  padding-right: 2.75rem;
+}
+
