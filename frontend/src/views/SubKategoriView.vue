@@ -1,239 +1,258 @@
 <template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-          Master Data: Sub Kategori
-        </h1>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-          Kelola rincian sub kategori dan batas plafon harga pengadaan barang.
-        </p>
+  <div>
+    <!-- Header Section -->
+    <div class="mb-3">
+      <div class="text-uppercase small fw-bold text-muted mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+        HOME &nbsp;/&nbsp; MASTER DATA &nbsp;/&nbsp; SUB KATEGORI
       </div>
-
-      <button
-        @click="openAddModal"
-        type="button"
-        class="inline-flex items-center px-4 py-2 border border-transparent bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs sm:text-sm font-semibold transition shadow-xs self-start sm:self-auto"
-      >
-        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        Tambah Sub Kategori
-      </button>
+      <h2 class="h1 fw-bold text-dark mb-0">
+        Sub Kategori
+      </h2>
     </div>
 
-    <!-- Toolbar: Search (nama kategori atau sub kategori) -->
-    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div class="w-full sm:w-96 relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+    <!-- Toolbar: Tambah Data di Kiri, Filter & Search di Kanan -->
+    <div class="row align-items-center g-2 mb-3">
+      <!-- Left: Button "+ Tambah Data" -->
+      <div class="col-auto">
+        <button
+          @click="openAddModal"
+          type="button"
+          class="btn btn-primary d-inline-flex align-items-center gap-1 px-3 py-2 fw-semibold"
+          style="background-color: #216ac4; border-color: #216ac4;"
+        >
+          <span class="fs-4 lh-1">+</span>
+          <span>Tambah Data</span>
+        </button>
+      </div>
+
+      <!-- Right: Filter Kategori & Search -->
+      <div class="col-auto ms-auto d-flex align-items-center gap-2">
+        <!-- Filter Kategori Barang -->
+        <div style="min-width: 180px;">
+          <select
+            v-model="kategoriFilter"
+            class="form-select bg-white"
+          >
+            <option value="">Semua Kategori</option>
+            <option v-for="kat in store.kategoriList" :key="kat.id" :value="kat.id">
+              {{ kat.nama }}
+            </option>
+          </select>
         </div>
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Cari nama kategori atau sub kategori..."
-          class="block w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-        />
-      </div>
 
-      <div class="text-xs text-slate-500 w-full sm:w-auto text-right">
-        Total <strong class="text-slate-800 font-semibold">{{ filteredList.length }}</strong> sub kategori
+        <!-- Search Input -->
+        <div class="input-group" style="width: 220px;">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Cari data.."
+            class="form-control bg-white"
+          />
+          <button class="btn btn-outline-secondary bg-white text-secondary" type="button" title="Cari">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <circle cx="10" cy="10" r="7" />
+              <line x1="21" y1="21" x2="15" y2="15" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+    <!-- Table Card -->
+    <div class="card shadow-sm border-0 mb-4 bg-white">
+      <div class="table-responsive">
+        <table class="table table-vcenter align-middle mb-0 custom-master-table">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200 text-2xs uppercase tracking-wider font-bold text-slate-500">
-              <th class="py-3 px-4 text-center w-12">No</th>
-              <th class="py-3 px-4">Kategori Induk</th>
-              <th class="py-3 px-4">Nama Sub Kategori</th>
-              <th class="py-3 px-4 text-right">Batas Harga (Plafon)</th>
-              <th class="py-3 px-4 text-center w-28">Aksi</th>
+            <tr class="text-uppercase text-secondary small fw-bold" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+              <th class="text-center py-3" style="width: 50px;">NO</th>
+              <th class="py-3" style="width: 100px;">ACTION</th>
+              <th class="py-3" style="min-width: 200px;">KATEGORI BARANG</th>
+              <th class="py-3" style="min-width: 240px;">SUB KATEGORI BARANG</th>
+              <th class="text-end py-3" style="width: 180px;">BATAS HARGA (RP.)</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr
-              v-for="(sub, index) in paginatedList"
-              :key="sub.id"
-              class="hover:bg-slate-50/80 transition"
-            >
-              <td class="py-3 px-4 text-center text-slate-400 font-medium">
-                {{ (currentPage - 1) * pageSize + index + 1 }}
-              </td>
-              <td class="py-3 px-4 whitespace-nowrap">
-                <span class="inline-block px-2.5 py-1 bg-slate-100 text-slate-700 font-medium text-xs rounded-lg">
-                  {{ getKategoriName(sub.kategoriId) }}
-                </span>
-              </td>
-              <td class="py-3 px-4 font-semibold text-slate-800">
-                {{ sub.nama }}
-              </td>
-              <td class="py-3 px-4 text-right whitespace-nowrap">
-                <span class="font-bold text-emerald-700 text-xs sm:text-sm">
-                  {{ formatRupiah(sub.batasHarga) }}
-                </span>
-              </td>
-              <td class="py-3 px-4 text-center whitespace-nowrap">
-                <div class="inline-flex items-center space-x-1">
-                  <button
-                    @click="openEditModal(sub)"
-                    type="button"
-                    class="p-1.5 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg transition"
-                    title="Ubah Sub Kategori"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button
-                    @click="confirmDelete(sub)"
-                    type="button"
-                    class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition"
-                    title="Hapus Sub Kategori"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+          <tbody>
+            <tr v-if="filteredList.length === 0">
+              <td colspan="5" class="text-center py-5 text-secondary">
+                <div class="py-3">
+                  <p class="fw-bold mb-1">Tidak ada sub kategori ditemukan</p>
+                  <p class="small text-muted mb-0">Silakan tambah data baru atau sesuaikan filter pencarian.</p>
                 </div>
               </td>
             </tr>
 
-            <tr v-if="filteredList.length === 0">
-              <td colspan="5" class="py-10 text-center text-slate-400">
-                Tidak ada data sub kategori yang cocok dengan pencarian.
+            <tr
+              v-for="(item, index) in paginatedList"
+              :key="item.id"
+              class="master-row"
+            >
+              <!-- NO -->
+              <td class="text-center align-middle fw-medium text-dark">
+                {{ (currentPage - 1) * pageSize + index + 1 }}
+              </td>
+
+              <!-- ACTION: ✏️ Edit, 🗑️ Hapus (tanpa wrapper div) -->
+              <td class="align-middle text-nowrap">
+                <!-- Edit ✏️ -->
+                <button
+                  type="button"
+                  @click="openEditModal(item)"
+                  class="btn p-1 border-0 bg-transparent text-secondary hover-primary d-inline-block"
+                  title="Edit Data"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                    <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+                  </svg>
+                </button>
+
+                <!-- Hapus 🗑️ -->
+                <button
+                  type="button"
+                  @click="confirmDelete(item)"
+                  class="btn p-1 border-0 bg-transparent text-danger d-inline-block"
+                  title="Hapus Data"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm text-danger" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <line x1="4" y1="7" x2="20" y2="7" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                  </svg>
+                </button>
+              </td>
+
+              <!-- KATEGORI BARANG -->
+              <td class="fw-medium text-dark">
+                {{ getKategoriNama(item.kategoriId) }}
+              </td>
+
+              <!-- SUB KATEGORI BARANG -->
+              <td class="text-dark">
+                {{ item.nama }}
+              </td>
+
+              <!-- BATAS HARGA (RP.) -->
+              <td class="text-end fw-semibold text-dark">
+                {{ formatNumberOnly(item.batasHarga) }}
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Pagination Footer (10 per page) -->
-      <div class="px-4 py-3 sm:px-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-        <div>
-          Menampilkan
-          <strong class="font-semibold text-slate-900">{{ startIndex + 1 }}</strong> -
-          <strong class="font-semibold text-slate-900">{{ Math.min(endIndex, filteredList.length) }}</strong>
-          dari <strong class="font-semibold text-slate-900">{{ filteredList.length }}</strong> data
-        </div>
-
-        <div class="flex items-center space-x-1.5">
-          <button
-            @click="currentPage--"
-            :disabled="currentPage <= 1"
-            class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-medium"
+      <!-- Pagination Footer -->
+      <div class="card-footer bg-white border-0 py-3 d-flex justify-content-end align-items-center">
+        <ul class="pagination m-0 align-items-center gap-1">
+          <li
+            v-for="page in totalPages"
+            :key="page"
+            class="page-item"
+            :class="{ active: currentPage === page }"
           >
-            Sebelumnya
-          </button>
-          <template v-for="page in totalPages" :key="page">
             <button
+              class="page-link border-0 fw-semibold rounded"
+              :style="currentPage === page ? 'background-color: #2b6cb0; color: white;' : 'background-color: transparent; color: #4a5568;'"
               @click="currentPage = page"
-              class="w-8 h-8 rounded-lg font-semibold transition"
-              :class="currentPage === page ? 'bg-brand-600 text-white shadow-2xs' : 'border border-slate-200 hover:bg-slate-50 text-slate-700'"
             >
               {{ page }}
             </button>
-          </template>
-          <button
-            @click="currentPage++"
-            :disabled="currentPage >= totalPages"
-            class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-medium"
-          >
-            Berikutnya
-          </button>
-        </div>
+          </li>
+
+          <li class="page-item" :class="{ disabled: currentPage >= totalPages }">
+            <button
+              class="page-link border-0 text-secondary bg-transparent d-flex align-items-center gap-1"
+              @click="currentPage++"
+            >
+              <span>next</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- Modal Form Tambah / Edit Sub Kategori (Brief requirement) -->
-    <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" @click="closeModal"></div>
-
-        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-slate-100 p-6">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 class="text-base font-bold text-slate-900">
-              {{ editingId ? 'Edit Sub Kategori' : 'Tambah Sub Kategori Baru' }}
-            </h3>
-            <button @click="closeModal" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-              &times;
-            </button>
-          </div>
-
-          <form @submit.prevent="saveSubKategori" class="mt-4 space-y-4">
-            <!-- Kategori (Combobox, opsi diambil dari data Kategori) -->
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
-                Kategori <span class="text-rose-500">*</span>
-              </label>
-              <select
-                v-model="form.kategoriId"
-                required
-                class="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-              >
-                <option :value="''">-- Pilih Kategori --</option>
-                <option v-for="kat in store.kategoriList" :key="kat.id" :value="kat.id">
-                  {{ kat.kode }} - {{ kat.nama }}
-                </option>
-              </select>
+    <!-- Modal Form (Tambah / Edit Sub Kategori) - Clean & Clear tanpa AI guidance slop -->
+    <div v-if="showModal" class="modal modal-blur fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0, 0, 0, 0.45);">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;" role="document">
+        <div class="modal-content shadow-lg border-0 rounded-2">
+          <form @submit.prevent="saveSubKategori">
+            <div class="modal-header border-bottom py-3 px-4">
+              <h5 class="modal-title fw-bold text-dark m-0">
+                {{ isEditing ? 'Edit Sub Kategori' : 'Tambah Sub Kategori' }}
+              </h5>
+              <button type="button" class="btn-close" aria-label="Close" @click="showModal = false"></button>
             </div>
 
-            <!-- Nama Sub Kategori (maks 100 char) -->
-            <div>
-              <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                  Nama Sub Kategori <span class="text-rose-500">*</span>
-                </label>
-                <span class="text-2xs text-slate-400">{{ form.nama.length }}/100</span>
+            <div class="modal-body px-4 py-4">
+              <div v-if="modalError" class="alert alert-danger py-2 px-3 mb-3 small" role="alert">
+                {{ modalError }}
               </div>
-              <input
-                v-model="form.nama"
-                type="text"
-                maxlength="100"
-                placeholder="Contoh: Kertas & Formulir"
-                required
-                class="block w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-              />
-            </div>
 
-            <!-- Batas Harga (Rupiah dengan masking) -->
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
-                Batas Harga (Rupiah) <span class="text-rose-500">*</span>
-              </label>
-              <div class="relative">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-bold">Rp</span>
-                <input
-                  type="text"
-                  :value="formatRupiah(form.batasHarga, false)"
-                  @input="handlePriceMasking"
-                  placeholder="0"
+              <!-- Kategori Barang -->
+              <div class="mb-3">
+                <label class="form-label text-dark fw-medium small mb-1">Kategori Barang</label>
+                <select
+                  v-model="form.kategoriId"
                   required
-                  class="block w-full pl-9 pr-3 py-2 text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
+                  class="form-select bg-white"
+                >
+                  <option value="">Pilih Kategori</option>
+                  <option v-for="kat in store.kategoriList" :key="kat.id" :value="kat.id">
+                    {{ kat.nama }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Sub Kategori Barang -->
+              <div class="mb-3">
+                <label class="form-label text-dark fw-medium small mb-1">Sub Kategori Barang</label>
+                <input
+                  v-model="form.nama"
+                  type="text"
+                  maxlength="100"
+                  required
+                  placeholder="Contoh: Alat Tulis"
+                  class="form-control"
                 />
               </div>
-              <p class="text-2xs text-slate-400 mt-1">Nilai plafon maksimum untuk setiap form Barang Masuk.</p>
+
+              <!-- Batas Harga (Rp.) dengan prefix Rp. di kiri -->
+              <div class="mb-2">
+                <label class="form-label text-dark fw-medium small mb-1">Batas Harga (Rp.)</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted small px-2">
+                    Rp.
+                  </span>
+                  <input
+                    :value="form.batasHargaFormatted"
+                    @input="onBatasHargaInput"
+                    type="text"
+                    required
+                    placeholder="500.000"
+                    class="form-control bg-white border-start-0 text-end pe-2"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div class="mt-6 flex justify-end space-x-2 pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                @click="closeModal"
-                class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
+            <div class="modal-footer border-top py-3 px-4 d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary px-3" @click="showModal = false">
                 Batal
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-xs"
+                class="btn text-white px-4 fw-semibold"
+                style="background-color: #2b708b; border-color: #2b708b;"
               >
-                {{ editingId ? 'Simpan Perubahan' : 'Tambah Sub Kategori' }}
+                Simpan
               </button>
             </div>
           </form>
@@ -245,8 +264,8 @@
     <ConfirmModal
       :show="showDeleteModal"
       title="Hapus Sub Kategori"
-      :message="`Apakah Anda yakin ingin menghapus Sub Kategori '${itemToDelete?.nama}'?`"
-      confirmText="Ya, Hapus"
+      :message="`Apakah Anda yakin ingin menghapus sub kategori '${itemToDelete?.nama}'? Data barang masuk terkait mungkin terdampak.`"
+      confirmText="Ya, Hapus Data"
       :danger="true"
       @confirm="executeDelete"
       @cancel="showDeleteModal = false"
@@ -257,110 +276,165 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { store } from '../store/mockStore';
-import { formatRupiah, parseRupiah } from '../utils/formatters';
 import ConfirmModal from '../components/ConfirmModal.vue';
 
 const searchQuery = ref('');
+const kategoriFilter = ref('');
 const currentPage = ref(1);
 const pageSize = 10;
 
-function getKategoriName(kategoriId) {
-  const found = store.kategoriList.find(k => k.id === kategoriId);
-  return found ? `${found.kode} - ${found.nama}` : '-';
-}
+const showModal = ref(false);
+const isEditing = ref(false);
+const editingId = ref(null);
+const modalError = ref('');
 
-// Filtered list by search (nama kategori atau nama sub kategori)
-const filteredList = computed(() => {
-  if (!searchQuery.value.trim()) return store.subKategoriList;
-  const q = searchQuery.value.trim().toLowerCase();
-  return store.subKategoriList.filter(s => {
-    const katName = getKategoriName(s.kategoriId).toLowerCase();
-    const subName = s.nama.toLowerCase();
-    return katName.includes(q) || subName.includes(q);
-  });
+const showDeleteModal = ref(false);
+const itemToDelete = ref(null);
+
+const form = reactive({
+  kategoriId: '',
+  nama: '',
+  batasHarga: 0,
+  batasHargaFormatted: ''
 });
 
-// Pagination
+function getKategoriNama(kategoriId) {
+  const k = store.kategoriList.find(c => c.id === Number(kategoriId));
+  return k ? k.nama : '-';
+}
+
+function formatNumberOnly(val) {
+  if (val === null || val === undefined || val === '') return '0';
+  const num = typeof val === 'string' ? parseInt(val.replace(/\D/g, ''), 10) || 0 : Math.round(val);
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function onBatasHargaInput(e) {
+  const cleanNumber = parseInt(e.target.value.replace(/\D/g, ''), 10) || 0;
+  form.batasHarga = cleanNumber;
+  form.batasHargaFormatted = cleanNumber ? formatNumberOnly(cleanNumber) : '';
+}
+
+const filteredList = computed(() => {
+  let list = [...store.subKategoriList];
+
+  if (kategoriFilter.value) {
+    list = list.filter(s => s.kategoriId === Number(kategoriFilter.value));
+  }
+
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase();
+    list = list.filter(s => {
+      const katNama = getKategoriNama(s.kategoriId).toLowerCase();
+      return s.nama.toLowerCase().includes(q) || katNama.includes(q);
+    });
+  }
+
+  return list;
+});
+
 const totalPages = computed(() => Math.ceil(filteredList.value.length / pageSize) || 1);
 const startIndex = computed(() => (currentPage.value - 1) * pageSize);
 const endIndex = computed(() => startIndex.value + pageSize);
 const paginatedList = computed(() => filteredList.value.slice(startIndex.value, endIndex.value));
 
-// Modal Form State
-const showModal = ref(false);
-const editingId = ref(null);
-const form = reactive({
-  kategoriId: '',
-  nama: '',
-  batasHarga: 0
-});
-
 function openAddModal() {
+  isEditing.value = false;
   editingId.value = null;
-  form.kategoriId = store.kategoriList[0]?.id || '';
+  form.kategoriId = kategoriFilter.value || (store.kategoriList[0]?.id || '');
   form.nama = '';
-  form.batasHarga = 5000000;
+  form.batasHarga = 0;
+  form.batasHargaFormatted = '';
+  modalError.value = '';
   showModal.value = true;
 }
 
-function openEditModal(sub) {
-  editingId.value = sub.id;
-  form.kategoriId = sub.kategoriId;
-  form.nama = sub.nama;
-  form.batasHarga = sub.batasHarga;
+function openEditModal(item) {
+  isEditing.value = true;
+  editingId.value = item.id;
+  form.kategoriId = item.kategoriId;
+  form.nama = item.nama;
+  form.batasHarga = item.batasHarga;
+  form.batasHargaFormatted = formatNumberOnly(item.batasHarga);
+  modalError.value = '';
   showModal.value = true;
-}
-
-function closeModal() {
-  showModal.value = false;
-  editingId.value = null;
-}
-
-function handlePriceMasking(e) {
-  form.batasHarga = parseRupiah(e.target.value);
 }
 
 function saveSubKategori() {
-  if (!form.kategoriId || !form.nama.trim() || form.batasHarga <= 0) {
-    alert('Harap lengkapi semua isian (Kategori, nama sub kategori, dan batas harga > 0).');
+  modalError.value = '';
+  const trimmedNama = form.nama.trim();
+
+  if (!form.kategoriId) {
+    modalError.value = 'Kategori barang wajib dipilih!';
+    return;
+  }
+  if (!trimmedNama) {
+    modalError.value = 'Nama sub kategori barang wajib diisi!';
+    return;
+  }
+  if (!form.batasHarga || form.batasHarga <= 0) {
+    modalError.value = 'Batas harga harus lebih dari 0!';
     return;
   }
 
-  if (editingId.value) {
+  if (isEditing.value) {
     store.updateSubKategori(editingId.value, {
       kategoriId: Number(form.kategoriId),
-      nama: form.nama,
+      nama: trimmedNama,
       batasHarga: Number(form.batasHarga)
     });
+    store.showToast('Sub kategori berhasil diperbarui', 'success');
   } else {
     store.addSubKategori({
       kategoriId: Number(form.kategoriId),
-      nama: form.nama,
+      nama: trimmedNama,
       batasHarga: Number(form.batasHarga)
     });
+    store.showToast('Sub kategori baru berhasil ditambahkan', 'success');
   }
-  closeModal();
+
+  showModal.value = false;
 }
 
-// Delete State
-const showDeleteModal = ref(false);
-const itemToDelete = ref(null);
-
-function confirmDelete(sub) {
-  itemToDelete.value = sub;
+function confirmDelete(item) {
+  itemToDelete.value = item;
   showDeleteModal.value = true;
 }
 
 function executeDelete() {
   if (itemToDelete.value) {
-    try {
-      store.deleteSubKategori(itemToDelete.value.id);
-      showDeleteModal.value = false;
-      itemToDelete.value = null;
-    } catch (err) {
-      alert(err.message);
-      showDeleteModal.value = false;
-    }
+    store.deleteSubKategori(itemToDelete.value.id);
+    showDeleteModal.value = false;
+    itemToDelete.value = null;
+    store.showToast('Sub kategori berhasil dihapus', 'success');
   }
 }
 </script>
+
+<style scoped>
+.hover-primary:hover {
+  color: #216ac4 !important;
+}
+
+.custom-master-table {
+  border-collapse: collapse !important;
+  width: 100%;
+}
+
+.custom-master-table thead tr th {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.custom-master-table th,
+.custom-master-table td {
+  padding: 0.75rem 0.85rem;
+}
+
+.custom-master-table .master-row td {
+  border-top: 1px solid #e2e8f0;
+}
+</style>

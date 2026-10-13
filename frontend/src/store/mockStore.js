@@ -367,6 +367,9 @@ export const store = reactive({
   kategoriList: saved.kategoriList,
   subKategoriList: saved.subKategoriList,
   userList: saved.userList,
+  get usersList() {
+    return this.userList || [];
+  },
   barangMasukList: saved.barangMasukList,
 
   // Toast notification state
