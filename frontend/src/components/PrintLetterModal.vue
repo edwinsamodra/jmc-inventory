@@ -1,32 +1,36 @@
 <template>
-  <div v-if="show && item" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" @click="$emit('close')"></div>
-
-      <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full border border-slate-100">
+  <div v-if="show && item" class="modal modal-blur fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+      <div class="modal-content shadow-lg">
         <!-- Modal Toolbar (Hidden when printing) -->
-        <div class="no-print bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        <div class="modal-header d-print-none bg-light">
+          <div class="d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon text-primary" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" />
+              <path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" />
+              <rect x="7" y="13" width="10" height="8" rx="2" />
             </svg>
-            <h3 class="text-base font-semibold text-slate-800">Pratinjau Cetak Surat Masuk</h3>
+            <h3 class="modal-title fw-bold">Pratinjau Cetak Surat Masuk</h3>
           </div>
-          <div class="flex items-center space-x-2">
+          <div class="d-flex align-items-center gap-2">
             <button
               @click="triggerPrint"
               type="button"
-              class="inline-flex items-center px-4 py-2 border border-transparent rounded-xl shadow-xs text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 transition"
+              class="btn btn-primary"
             >
-              <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon me-1" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" />
+                <path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" />
+                <rect x="7" y="13" width="10" height="8" rx="2" />
               </svg>
               Cetak Dokumen
             </button>
             <button
               @click="$emit('close')"
               type="button"
-              class="px-3 py-2 border border-slate-300 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-100 transition"
+              class="btn btn-outline-secondary"
             >
               Tutup
             </button>
@@ -34,93 +38,121 @@
         </div>
 
         <!-- Printable Document Canvas -->
-        <div class="p-8 sm:p-12 printable-document font-serif text-slate-900 bg-white min-h-[500px]">
+        <div class="modal-body p-4 p-md-5 printable-document bg-white text-dark">
           <!-- Letterhead / Kop Surat -->
-          <div class="border-b-2 border-slate-900 pb-4 mb-6 text-center">
-            <h2 class="text-2xl font-bold tracking-wide uppercase font-sans text-slate-900">JMC LOGISTIK & PENGELOLAAN BARANG</h2>
-            <p class="text-xs text-slate-600 font-sans mt-0.5">Jl. Jenderal Sudirman No. 88, Kawasan Niaga Terpadu | Telp: (021) 555-8899 | Email: logistik@jmc.co.id</p>
+          <div class="border-bottom border-dark border-3 pb-3 mb-4 text-center">
+            <h2 class="h1 fw-bold text-uppercase mb-1 tracking-wide">JMC LOGISTIK & PENGELOLAAN BARANG</h2>
+            <p class="text-secondary small mb-0">Jl. Jenderal Sudirman No. 88, Kawasan Niaga Terpadu | Telp: (021) 555-8899 | Email: logistik@jmc.co.id</p>
           </div>
 
-          <div class="text-center mb-6">
-            <h1 class="text-xl font-bold uppercase underline font-sans tracking-wide">SURAT TANDA PENERIMAAN BARANG MASUK</h1>
-            <p class="text-xs font-mono mt-1 text-slate-600 font-sans">Nomor: {{ item.nomorSurat || '-' }}</p>
+          <div class="text-center mb-4">
+            <h3 class="h2 fw-bold text-uppercase text-decoration-underline mb-1">SURAT TANDA PENERIMAAN BARANG MASUK</h3>
+            <div class="text-secondary">Nomor: {{ item.nomorSurat || '-' }}</div>
           </div>
 
-          <!-- Metadata Grid -->
-          <div class="grid grid-cols-2 gap-4 text-xs font-sans mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <div>
-              <div class="flex py-0.5"><span class="w-32 text-slate-500 font-medium">Tanggal Diterima</span><span class="mr-2">:</span><span class="font-semibold">{{ formatDateFormal(item.tanggal) }}</span></div>
-              <div class="flex py-0.5"><span class="w-32 text-slate-500 font-medium">Asal Barang / Vendor</span><span class="mr-2">:</span><span class="font-semibold">{{ item.asalBarang }}</span></div>
-              <div class="flex py-0.5"><span class="w-32 text-slate-500 font-medium">Lampiran Dokumen</span><span class="mr-2">:</span><span>{{ item.lampiranName || 'Tidak Ada Lampiran' }}</span></div>
-            </div>
-            <div>
-              <div class="flex py-0.5"><span class="w-32 text-slate-500 font-medium">Kategori</span><span class="mr-2">:</span><span>{{ item.kategoriNama }}</span></div>
-              <div class="flex py-0.5"><span class="w-32 text-slate-500 font-medium">Sub Kategori</span><span class="mr-2">:</span><span class="font-semibold">{{ item.subKategoriNama }}</span></div>
-              <div class="flex py-0.5"><span class="w-32 text-slate-500 font-medium">Operator Penerima</span><span class="mr-2">:</span><span class="font-semibold text-brand-700">{{ item.operatorNama }}</span></div>
+          <!-- Metadata Table -->
+          <div class="card bg-light border mb-4">
+            <div class="card-body py-3">
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-4 text-secondary">Tanggal:</div>
+                    <div class="col-8 fw-semibold">{{ formatDateFormal(item.tanggal) }}</div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-4 text-secondary">Asal / Rekanan:</div>
+                    <div class="col-8 fw-bold">{{ item.asalBarang }}</div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-4 text-secondary">Lampiran:</div>
+                    <div class="col-8">{{ item.lampiranName || '-' }}</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-4 text-secondary">Kategori:</div>
+                    <div class="col-8">{{ item.kategoriNama }}</div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-4 text-secondary">Sub Kategori:</div>
+                    <div class="col-8 fw-semibold">{{ item.subKategoriNama }}</div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-4 text-secondary">Petugas Penerima:</div>
+                    <div class="col-8 fw-bold text-primary">{{ item.operatorNama }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Items Table -->
-          <div class="mb-6 font-sans">
-            <table class="w-full text-xs border-collapse border border-slate-300">
-              <thead>
-                <tr class="bg-slate-100 text-slate-700">
-                  <th class="border border-slate-300 px-3 py-2 text-center w-10">No</th>
-                  <th class="border border-slate-300 px-3 py-2 text-left">Nama Barang</th>
-                  <th class="border border-slate-300 px-3 py-2 text-right w-24">Harga Satuan</th>
-                  <th class="border border-slate-300 px-3 py-2 text-center w-20">Jumlah</th>
-                  <th class="border border-slate-300 px-3 py-2 text-center w-20">Satuan</th>
-                  <th class="border border-slate-300 px-3 py-2 text-right w-28">Total</th>
-                  <th class="border border-slate-300 px-3 py-2 text-center w-24">Tgl Expired</th>
+          <div class="table-responsive mb-4">
+            <table class="table table-bordered border-dark align-middle">
+              <thead class="table-light border-dark">
+                <tr>
+                  <th class="text-center w-1">No</th>
+                  <th>Nama Barang</th>
+                  <th class="text-end">Harga Satuan</th>
+                  <th class="text-center">Jumlah</th>
+                  <th>Satuan</th>
+                  <th class="text-end">Total Harga</th>
+                  <th class="text-center">Tgl Expired</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(b, idx) in item.items" :key="idx" class="hover:bg-slate-50">
-                  <td class="border border-slate-300 px-3 py-2 text-center">{{ idx + 1 }}</td>
-                  <td class="border border-slate-300 px-3 py-2 font-medium">{{ b.namaBarang }}</td>
-                  <td class="border border-slate-300 px-3 py-2 text-right">{{ formatRupiah(b.harga) }}</td>
-                  <td class="border border-slate-300 px-3 py-2 text-center font-semibold">{{ b.jumlah }}</td>
-                  <td class="border border-slate-300 px-3 py-2 text-center">{{ b.satuan }}</td>
-                  <td class="border border-slate-300 px-3 py-2 text-right font-medium">{{ formatRupiah(b.total) }}</td>
-                  <td class="border border-slate-300 px-3 py-2 text-center text-slate-500">{{ formatDateIndo(b.expiredDate) || '-' }}</td>
+                <tr v-for="(it, idx) in item.items" :key="idx">
+                  <td class="text-center">{{ idx + 1 }}</td>
+                  <td class="fw-semibold">{{ it.namaBarang }}</td>
+                  <td class="text-end">{{ formatRupiah(it.harga) }}</td>
+                  <td class="text-center fw-bold">{{ it.jumlah }}</td>
+                  <td>{{ it.satuan }}</td>
+                  <td class="text-end fw-bold">{{ formatRupiah(it.total) }}</td>
+                  <td class="text-center small">{{ it.expiredDate || '-' }}</td>
                 </tr>
               </tbody>
               <tfoot>
-                <tr class="bg-slate-100 font-semibold text-slate-900">
-                  <td colspan="5" class="border border-slate-300 px-3 py-2 text-right">TOTAL KESELURUHAN:</td>
-                  <td class="border border-slate-300 px-3 py-2 text-right text-brand-700 font-bold">{{ formatRupiah(item.totalHarga) }}</td>
-                  <td class="border border-slate-300 px-3 py-2"></td>
+                <tr class="table-light border-dark">
+                  <td colspan="5" class="text-end fw-bold">TOTAL KESELURUHAN:</td>
+                  <td class="text-end fw-bold fs-4 text-primary">{{ formatRupiah(item.totalHarga) }}</td>
+                  <td></td>
                 </tr>
-                <tr class="text-xs text-slate-500">
-                  <td colspan="5" class="border border-slate-300 px-3 py-1.5 text-right italic">Batas Plafon Sub Kategori:</td>
-                  <td class="border border-slate-300 px-3 py-1.5 text-right font-semibold">{{ formatRupiah(item.batasHargaSubKategori) }}</td>
-                  <td class="border border-slate-300 px-3 py-1.5 text-center text-emerald-600 font-medium">MEMENUHI</td>
+                <tr>
+                  <td colspan="7" class="small text-secondary">
+                    <em>Terbilang: Lima Puluh Empat Juta Empat Ratus Ribu Rupiah (Plafon Sub Kategori: {{ formatRupiah(item.batasHargaSubKategori) }})</em>
+                  </td>
                 </tr>
               </tfoot>
             </table>
           </div>
 
           <!-- Signatures Section -->
-          <div class="grid grid-cols-3 gap-6 text-center text-xs font-sans mt-12 pt-4 border-t border-dashed border-slate-200">
-            <div>
-              <p class="text-slate-600 mb-16">Diserahkan Oleh,</p>
-              <div class="border-b border-slate-400 w-36 mx-auto mb-1"></div>
-              <p class="font-semibold text-slate-800">{{ item.asalBarang }}</p>
-              <p class="text-slate-400 text-2xs">Vendor / Ekspedisi</p>
+          <div class="row mt-5 pt-3">
+            <div class="col-6 text-center">
+              <p class="mb-1 text-secondary">Diserahkan oleh (Rekanan / Vendor):</p>
+              <div class="fw-bold mt-1">{{ item.asalBarang }}</div>
+              <div style="height: 70px;"></div>
+              <div class="fw-bold text-decoration-underline">(...............................................)</div>
+              <div class="small text-secondary">Tanda Tangan & Nama Terang</div>
             </div>
-            <div>
-              <p class="text-slate-600 mb-16">Diterima Oleh,</p>
-              <div class="border-b border-slate-400 w-36 mx-auto mb-1"></div>
-              <p class="font-semibold text-slate-800">{{ item.operatorNama }}</p>
-              <p class="text-slate-400 text-2xs">Operator Gudang</p>
-            </div>
-            <div>
-              <p class="text-slate-600 mb-16">Mengetahui & Verifikasi,</p>
-              <div class="border-b border-slate-400 w-36 mx-auto mb-1"></div>
-              <p class="font-semibold text-slate-800">{{ item.isVerified ? 'Kepala Gudang / Admin' : '(Belum Diverifikasi)' }}</p>
-              <p class="text-slate-400 text-2xs">Supervisor Logistik</p>
+
+            <div class="col-6 text-center">
+              <p class="mb-1 text-secondary">Diterima oleh Petugas Logistik:</p>
+              <div class="fw-bold mt-1 text-primary">JMC Inventory Management</div>
+              <div style="height: 70px;"></div>
+              <div class="fw-bold text-decoration-underline">({{ item.operatorNama }})</div>
+              <div class="small text-secondary">Petugas Penerimaan Barang</div>
             </div>
           </div>
+        </div>
+
+        <div class="modal-footer d-print-none">
+          <button type="button" class="btn btn-secondary" @click="$emit('close')">
+            Tutup
+          </button>
+          <button type="button" class="btn btn-primary" @click="triggerPrint">
+            Cetak Dokumen
+          </button>
         </div>
       </div>
     </div>
@@ -128,14 +160,21 @@
 </template>
 
 <script setup>
-import { formatRupiah, formatDateIndo, formatDateFormal } from '../utils/formatters';
+import { formatRupiah } from '../utils/formatters';
 
-defineProps({
+const props = defineProps({
   show: Boolean,
   item: Object
 });
 
 defineEmits(['close']);
+
+function formatDateFormal(dateStr) {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  return d.toLocaleDateString('id-ID', options);
+}
 
 function triggerPrint() {
   window.print();

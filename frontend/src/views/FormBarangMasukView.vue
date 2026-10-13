@@ -1,435 +1,280 @@
 <template>
-  <div class="max-w-6xl mx-auto space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <RouterLink
-          to="/barang-masuk"
-          class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
-          title="Kembali ke Daftar"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-        </RouterLink>
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            {{ isEditMode ? 'Edit Data Barang Masuk' : 'Tambah Barang Masuk' }}
-          </h1>
-          <p class="text-xs sm:text-sm text-slate-500">
-            {{ isEditMode ? 'Perbarui informasi transaksi dan item barang masuk' : 'Formulir input data penerimaan barang dan rincian item' }}
-          </p>
-        </div>
+  <div class="py-2">
+    <!-- Card 1: INFORMASI UMUM -->
+    <div class="card shadow-sm border-0 mb-4 bg-white rounded-2">
+      <div class="card-header bg-white border-bottom py-3 px-4">
+        <h4 class="fw-bold text-dark m-0" style="font-size: 0.9rem; letter-spacing: 0.05em;">
+          INFORMASI UMUM
+        </h4>
       </div>
-
-      <div class="flex items-center space-x-2">
-        <RouterLink
-          to="/barang-masuk"
-          class="px-4 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
-        >
-          Batal
-        </RouterLink>
-        <button
-          @click="handleSubmit"
-          type="button"
-          :disabled="isOverLimit || form.items.length === 0"
-          class="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          :class="isOverLimit ? 'bg-slate-400' : 'bg-brand-600 hover:bg-brand-700'"
-        >
-          {{ isEditMode ? 'Simpan Perubahan' : 'Simpan Transaksi' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Live Budget Validation Banner (Crucial Requirement) -->
-    <div
-      v-if="selectedSubKategori"
-      class="p-4 rounded-2xl border transition-all"
-      :class="isOverLimit ? 'bg-rose-50 border-rose-300 text-rose-900 shadow-sm' : 'bg-emerald-50 border-emerald-300 text-emerald-900'"
-    >
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="flex items-start space-x-3">
-          <div
-            class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-            :class="isOverLimit ? 'bg-rose-200 text-rose-700' : 'bg-emerald-200 text-emerald-700'"
-          >
-            <svg v-if="isOverLimit" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <div>
-            <div class="font-bold text-sm">
-              {{ isOverLimit ? 'VALIDASI GAGAL: Total Harga Melebihi Batas Anggaran Sub Kategori!' : 'VALIDASI LOLOS: Total Harga Sesuai Batas Anggaran Sub Kategori' }}
-            </div>
-            <p class="text-xs mt-0.5 opacity-90">
-              <span v-if="isOverLimit">
-                Total item bernilai <strong>{{ formatRupiah(grandTotal) }}</strong>, melebihi batas harga Sub Kategori <strong>{{ formatRupiah(batasHargaSubKategori) }}</strong> sebesar <strong class="underline">{{ formatRupiah(grandTotal - batasHargaSubKategori) }}</strong>. Form tidak dapat disimpan.
-              </span>
-              <span v-else>
-                Total saat ini <strong>{{ formatRupiah(grandTotal) }}</strong> dari pagu anggaran <strong>{{ formatRupiah(batasHargaSubKategori) }}</strong> (Sisa alokasi: <strong>{{ formatRupiah(batasHargaSubKategori - grandTotal) }}</strong>).
-              </span>
-            </p>
-          </div>
-        </div>
-
-        <div class="text-right sm:border-l sm:pl-4" :class="isOverLimit ? 'border-rose-200' : 'border-emerald-200'">
-          <div class="text-2xs font-bold uppercase tracking-wider opacity-75">Batas Harga Sub Kategori</div>
-          <div class="text-base font-extrabold">{{ formatRupiah(batasHargaSubKategori) }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 1: Informasi Umum -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-5">
-      <div class="border-b border-slate-100 pb-3">
-        <h2 class="text-base font-bold text-slate-800 flex items-center">
-          <span class="w-2 h-2 rounded-full bg-brand-600 mr-2"></span>
-          Informasi Umum
-        </h2>
-        <p class="text-xs text-slate-500 mt-0.5">Lengkapi informasi dasar penerimaan dan vendor pengirim</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="card-body px-4 py-4">
         <!-- 1. Operator -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-            Operator <span class="text-rose-500">*</span>
+        <div class="mb-3" style="max-width: 250px;">
+          <label class="form-label text-dark fw-medium small mb-1">
+            Operator
           </label>
-          <div v-if="isAdmin">
-            <select
-              v-model="form.operatorId"
-              class="block w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-              required
-            >
-              <option :value="''">-- Pilih Operator --</option>
-              <option v-for="op in operatorUsers" :key="op.id" :value="op.id">
-                {{ op.nama }} (@{{ op.username }})
-              </option>
-            </select>
-            <p class="text-2xs text-slate-400 mt-1">Admin dapat memilih nama operator yang bertugas.</p>
-          </div>
-          <div v-else>
-            <input
-              type="text"
-              :value="store.currentUser?.nama"
-              readonly
-              disabled
-              class="block w-full px-3 py-2.5 text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-600 cursor-not-allowed font-medium"
-            />
-            <p class="text-2xs text-slate-400 mt-1">Operator otomatis terkunci pada diri sendiri.</p>
-          </div>
+          <select
+            v-if="isAdmin"
+            v-model="form.operatorId"
+            class="form-select bg-white"
+          >
+            <option v-for="op in operatorList" :key="op.id" :value="op.id">
+              {{ op.nama }}
+            </option>
+          </select>
+          <input
+            v-else
+            type="text"
+            :value="store.currentUser?.nama"
+            readonly
+            class="form-control bg-light"
+          />
         </div>
 
         <!-- 2. Kategori -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-            Kategori <span class="text-rose-500">*</span>
+        <div class="mb-3" style="max-width: 250px;">
+          <label class="form-label text-dark fw-medium small mb-1">
+            Kategori
           </label>
           <select
             v-model="form.kategoriId"
             @change="handleKategoriChange"
-            class="block w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-            required
+            class="form-select bg-white"
           >
-            <option :value="''">-- Pilih Kategori --</option>
-            <option v-for="k in store.kategoriList" :key="k.id" :value="k.id">
-              {{ k.kode }} - {{ k.nama }}
+            <option value="">Pilih Kategori</option>
+            <option v-for="kat in store.kategoriList" :key="kat.id" :value="kat.id">
+              {{ kat.nama }}
             </option>
           </select>
-          <p v-if="errors.kategoriId" class="text-2xs text-rose-500 mt-1">{{ errors.kategoriId }}</p>
         </div>
 
-        <!-- 3. Sub Kategori -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-            Sub Kategori <span class="text-rose-500">*</span>
-          </label>
-          <select
-            v-model="form.subKategoriId"
-            :disabled="!form.kategoriId"
-            class="block w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-            required
-          >
-            <option :value="''">
-              {{ form.kategoriId ? '-- Pilih Sub Kategori --' : '-- Pilih Kategori Terlebih Dahulu --' }}
-            </option>
-            <option v-for="s in filteredSubKategori" :key="s.id" :value="s.id">
-              {{ s.nama }}
-            </option>
-          </select>
-          <p v-if="errors.subKategoriId" class="text-2xs text-rose-500 mt-1">{{ errors.subKategoriId }}</p>
-        </div>
+        <!-- 3. Sub Kategori & Batas Harga (Side-by-Side) -->
+        <div class="d-flex flex-wrap gap-4 align-items-start mb-3">
+          <div style="width: 250px;">
+            <label class="form-label text-dark fw-medium small mb-1">
+              Sub Kategori
+            </label>
+            <select
+              v-model="form.subKategoriId"
+              :disabled="!form.kategoriId"
+              class="form-select bg-white"
+            >
+              <option value="">Pilih Sub Kategori</option>
+              <option v-for="sub in filteredSubKategori" :key="sub.id" :value="sub.id">
+                {{ sub.nama }}
+              </option>
+            </select>
+          </div>
 
-        <!-- 4. Batas Harga (Readonly text) -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-            Batas Harga Sub Kategori
-          </label>
-          <div class="relative">
+          <div style="width: 250px;">
+            <label class="form-label text-dark fw-medium small mb-1">
+              Batas Harga
+            </label>
             <input
               type="text"
-              :value="formatRupiah(batasHargaSubKategori)"
+              :value="selectedSubKategori ? formatNumberOnly(selectedSubKategori.batasHarga) : ''"
               readonly
-              class="block w-full px-3 py-2.5 text-sm bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 cursor-not-allowed"
+              class="form-control bg-light"
+              placeholder="500.000"
             />
           </div>
-          <p class="text-2xs text-slate-400 mt-1">Plafon anggaran maksimum pengadaan per sub kategori.</p>
         </div>
 
-        <!-- 5. Tanggal Masuk -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-            Tanggal Masuk <span class="text-rose-500">*</span>
+        <!-- 4. Asal Barang -->
+        <div class="mb-3" style="max-width: 520px;">
+          <label class="form-label text-dark fw-medium small mb-1">
+            Asal Barang
           </label>
-          <input
-            v-model="form.tanggal"
-            type="date"
-            class="block w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-            required
-          />
-          <p v-if="errors.tanggal" class="text-2xs text-rose-500 mt-1">{{ errors.tanggal }}</p>
-        </div>
-
-        <!-- 6. Asal Barang (Textbox, max 200 char) -->
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-              Asal Barang <span class="text-rose-500">*</span>
-            </label>
-            <span class="text-2xs" :class="form.asalBarang.length > 200 ? 'text-rose-500 font-bold' : 'text-slate-400'">
-              {{ form.asalBarang.length }}/200
-            </span>
-          </div>
           <input
             v-model="form.asalBarang"
             type="text"
             maxlength="200"
-            placeholder="Nama vendor / rekanan / asal instansi"
-            class="block w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-            required
+            class="form-control bg-white"
           />
-          <p v-if="errors.asalBarang" class="text-2xs text-rose-500 mt-1">{{ errors.asalBarang }}</p>
         </div>
 
-        <!-- 7. Nomor Surat (Textbox, opsional, max 100 char) -->
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-              Nomor Surat <span class="text-slate-400 font-normal lowercase">(opsional)</span>
+        <!-- 5. Nomor Surat & Lampiran (Side-by-Side) -->
+        <div class="d-flex flex-wrap gap-4 align-items-start">
+          <div style="width: 250px;">
+            <label class="form-label text-dark fw-medium small mb-1">
+              Nomor Surat
             </label>
-            <span class="text-2xs text-slate-400">{{ form.nomorSurat.length }}/100</span>
+            <input
+              v-model="form.nomorSurat"
+              type="text"
+              maxlength="100"
+              class="form-control bg-white"
+            />
           </div>
-          <input
-            v-model="form.nomorSurat"
-            type="text"
-            maxlength="100"
-            placeholder="Contoh: SRT/2026/04/001"
-            class="block w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-          />
-        </div>
 
-        <!-- 8. Lampiran (File, opsional, doc/docx/zip) -->
-        <div class="md:col-span-2 lg:col-span-2">
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-            Lampiran Dokumen <span class="text-slate-400 font-normal lowercase">(opsional, ekstensi doc, docx, zip)</span>
-          </label>
-          <div class="flex items-center space-x-3">
-            <label class="cursor-pointer inline-flex items-center px-4 py-2.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 transition shadow-2xs">
-              <svg class="w-4 h-4 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-              </svg>
-              <span>Pilih File Lampiran</span>
-              <input
-                type="file"
-                accept=".doc,.docx,.zip"
-                class="hidden"
-                @change="handleFileUpload"
-              />
+          <div style="width: 260px;">
+            <label class="form-label text-dark fw-medium small mb-1">
+              Lampiran
             </label>
-
-            <div v-if="form.lampiranName" class="flex items-center space-x-2 text-xs text-brand-700 bg-brand-50 px-3 py-2 rounded-xl border border-brand-200">
-              <span class="font-medium truncate max-w-xs">{{ form.lampiranName }}</span>
-              <button
-                type="button"
-                @click="removeFile"
-                class="text-rose-500 hover:text-rose-700 p-0.5"
-                title="Hapus Lampiran"
-              >
-                &times;
-              </button>
-            </div>
-            <span v-else class="text-xs text-slate-400 italic">Belum ada file dipilih</span>
+            <input
+              type="file"
+              accept=".doc,.docx,.zip,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip"
+              @change="handleFileUpload"
+              class="form-control bg-white"
+            />
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Card 2: Informasi Barang (Multi-line Items Table) -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
-        <div>
-          <h2 class="text-base font-bold text-slate-800 flex items-center">
-            <span class="w-2 h-2 rounded-full bg-brand-600 mr-2"></span>
-            Informasi Barang
-          </h2>
-          <p class="text-xs text-slate-500 mt-0.5">Masukkan rincian item pengadaan. Total akumulasi otomatis dihitung.</p>
-        </div>
-
-        <!-- Tombol + (Tambah baris item) -->
-        <button
-          @click="addItemRow"
-          type="button"
-          class="inline-flex items-center px-3.5 py-2 border border-brand-300 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-xl text-xs font-bold transition shadow-2xs"
-        >
-          <svg class="w-4 h-4 mr-1 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Tambah Baris Item (+)
-        </button>
+    <!-- Card 2: INFORMASI BARANG -->
+    <div class="card shadow-sm border-0 mb-4 bg-white rounded-2">
+      <div class="card-header bg-white border-bottom py-3 px-4">
+        <h4 class="fw-bold text-dark m-0" style="font-size: 0.9rem; letter-spacing: 0.05em;">
+          INFORMASI BARANG
+        </h4>
       </div>
-
-      <!-- Items Table -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr class="bg-slate-50 border-b border-slate-200 text-2xs uppercase tracking-wider font-bold text-slate-500">
-              <th class="p-3 text-center w-10">No</th>
-              <th class="p-3 min-w-[200px]">Nama Barang <span class="text-rose-500">*</span></th>
-              <th class="p-3 min-w-[150px]">Harga Satuan (Rp) <span class="text-rose-500">*</span></th>
-              <th class="p-3 w-28">Jumlah (Qty) <span class="text-rose-500">*</span></th>
-              <th class="p-3 w-32">Satuan <span class="text-rose-500">*</span></th>
-              <th class="p-3 min-w-[150px] text-right">Total (Readonly)</th>
-              <th class="p-3 w-36 text-center">Tgl Expired</th>
-              <th class="p-3 text-center w-12">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-for="(item, idx) in form.items" :key="item.id" class="hover:bg-slate-50/50">
-              <!-- No -->
-              <td class="p-3 text-center text-slate-400 font-semibold">{{ idx + 1 }}</td>
-
-              <!-- Nama Barang (Textbox, max 200 char) -->
-              <td class="p-3">
-                <input
-                  v-model="item.namaBarang"
-                  type="text"
-                  maxlength="200"
-                  placeholder="Nama barang..."
-                  class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                  required
-                />
-              </td>
-
-              <!-- Harga (Rupiah masking) -->
-              <td class="p-3">
-                <div class="relative">
-                  <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-slate-400 text-2xs font-semibold">Rp</span>
+      <div class="card-body px-4 py-4">
+        <!-- Item Table / Row Grid matching Screenshot -->
+        <div class="table-responsive">
+          <table class="table table-borderless align-middle mb-0" style="border-collapse: separate; border-spacing: 0 10px;">
+            <thead>
+              <tr class="text-secondary small fw-medium" style="font-size: 0.85rem;">
+                <th style="min-width: 220px; padding: 0 6px 8px 0;">Nama Barang</th>
+                <th style="width: 170px; padding: 0 6px 8px 6px;">Harga (Rp.)</th>
+                <th style="width: 90px; padding: 0 6px 8px 6px;">Jumlah</th>
+                <th style="width: 100px; padding: 0 6px 8px 6px;">Satuan</th>
+                <th style="width: 170px; padding: 0 6px 8px 6px;">Total</th>
+                <th style="width: 180px; padding: 0 6px 8px 6px;">Tgl. Ekspired</th>
+                <th style="width: 55px; padding: 0 0 8px 6px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, idx) in form.items" :key="item.id || idx">
+                <!-- Nama Barang -->
+                <td style="padding: 0 6px 0 0;">
                   <input
+                    v-model="item.namaBarang"
                     type="text"
-                    :value="formatRupiah(item.harga, false)"
-                    @input="handlePriceInput(item, $event)"
-                    placeholder="0"
-                    class="w-full pl-7 pr-2.5 py-1.5 text-right border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                    required
+                    maxlength="200"
+                    class="form-control bg-white"
                   />
-                </div>
-              </td>
+                </td>
 
-              <!-- Jumlah Barang (Numerik) -->
-              <td class="p-3">
-                <input
-                  v-model.number="item.jumlah"
-                  type="number"
-                  min="1"
-                  placeholder="1"
-                  @input="recalculateRow(item)"
-                  class="w-full px-2.5 py-1.5 text-center border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                  required
-                />
-              </td>
+                <!-- Harga (Rp.) with Rp. prefix (di kiri) -->
+                <td style="padding: 0 6px;">
+                  <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted small px-2">
+                      Rp.
+                    </span>
+                    <input
+                      :value="formatNumberOnly(item.harga)"
+                      @input="e => onHargaInput(idx, e.target.value)"
+                      type="text"
+                      class="form-control bg-white border-start-0 text-end pe-2"
+                    />
+                  </div>
+                </td>
 
-              <!-- Satuan (Textbox, maks 40 char) -->
-              <td class="p-3">
-                <input
-                  v-model="item.satuan"
-                  type="text"
-                  maxlength="40"
-                  placeholder="Pcs/Box/Rim"
-                  class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                  required
-                />
-              </td>
+                <!-- Jumlah -->
+                <td style="padding: 0 6px;">
+                  <input
+                    v-model.number="item.jumlah"
+                    @input="recalculateItemTotal(idx)"
+                    type="number"
+                    min="1"
+                    class="form-control bg-white text-center"
+                  />
+                </td>
 
-              <!-- Total (Readonly, Rupiah, = Harga * Jumlah) -->
-              <td class="p-3 text-right">
-                <div class="font-bold text-slate-900 text-xs px-2 py-1.5 bg-slate-100 rounded-lg">
-                  {{ formatRupiah(item.total) }}
-                </div>
-              </td>
+                <!-- Satuan -->
+                <td style="padding: 0 6px;">
+                  <input
+                    v-model="item.satuan"
+                    type="text"
+                    maxlength="40"
+                    placeholder="Buah"
+                    class="form-control bg-white text-center"
+                  />
+                </td>
 
-              <!-- Tgl Expired (Date, opsional) -->
-              <td class="p-3 text-center">
-                <input
-                  v-model="item.expiredDate"
-                  type="date"
-                  class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-2xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                />
-              </td>
+                <!-- Total with Rp. prefix (di kiri) -->
+                <td style="padding: 0 6px;">
+                  <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted small px-2">
+                      Rp.
+                    </span>
+                    <input
+                      :value="formatNumberOnly(item.total)"
+                      readonly
+                      type="text"
+                      class="form-control bg-white border-start-0 text-end pe-2"
+                    />
+                  </div>
+                </td>
 
-              <!-- Tombol x (Hapus baris item) -->
-              <td class="p-3 text-center">
-                <button
-                  type="button"
-                  @click="removeItemRow(idx)"
-                  :disabled="form.items.length <= 1"
-                  class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="Hapus baris item ini (&times;)"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </td>
-            </tr>
-          </tbody>
+                <!-- Tgl. Ekspired -->
+                <td style="padding: 0 6px;">
+                  <input
+                    v-model="item.expiredDate"
+                    type="date"
+                    class="form-control bg-white"
+                  />
+                </td>
 
-          <!-- Table Summary Footer -->
-          <tfoot>
-            <tr class="bg-slate-50 font-bold border-t-2 border-slate-200 text-xs text-slate-800">
-              <td colspan="5" class="p-3 text-right uppercase tracking-wider text-slate-600">
-                TOTAL KESELURUHAN PENGADAAN:
-              </td>
-              <td class="p-3 text-right text-sm" :class="isOverLimit ? 'text-rose-600 font-extrabold' : 'text-brand-700 font-extrabold'">
-                {{ formatRupiah(grandTotal) }}
-              </td>
-              <td colspan="2" class="p-3 text-2xs font-normal text-slate-500 text-center">
-                ({{ form.items.length }} jenis barang)
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+                <!-- Action Button (+) on row 0, (x) on subsequent rows -->
+                <td style="padding: 0 0 0 6px;" class="text-center align-middle">
+                  <!-- Row 1: Add Row (+) Button -->
+                  <button
+                    v-if="idx === 0"
+                    type="button"
+                    @click="addItemRow"
+                    class="btn-action-add"
+                    title="Tambah Item"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  </button>
+
+                  <!-- Subsequent Rows: Remove Row (x) Button -->
+                  <button
+                    v-else
+                    type="button"
+                    @click="removeItemRow(idx)"
+                    class="btn-action-remove"
+                    title="Hapus Item"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Bottom Actions -->
-    <div class="flex items-center justify-end space-x-3 pt-2">
+    <!-- Bottom Actions (Kembali & Simpan) -->
+    <div class="d-flex align-items-center gap-3 pt-1 pb-4">
       <RouterLink
         to="/barang-masuk"
-        class="px-5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+        class="btn bg-white text-dark d-inline-flex align-items-center gap-2 px-3 py-2 fw-medium border shadow-none"
+        style="border-color: #cbd5e1 !important;"
       >
-        Batalkan
+        <span>&larr;</span>
+        <span>Kembali</span>
       </RouterLink>
+
       <button
-        @click="handleSubmit"
         type="button"
+        @click="handleSubmit"
         :disabled="isOverLimit || form.items.length === 0"
-        class="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-        :class="isOverLimit ? 'bg-slate-400' : 'bg-brand-600 hover:bg-brand-700'"
+        class="btn text-white px-4 py-2 fw-semibold shadow-none"
+        style="background-color: #2b708b; border-color: #2b708b;"
       >
-        {{ isEditMode ? 'Simpan Perubahan' : 'Simpan Transaksi Barang Masuk' }}
+        Simpan
       </button>
     </div>
   </div>
@@ -439,47 +284,41 @@
 import { reactive, computed, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { store } from '../store/mockStore';
-import { formatRupiah, parseRupiah } from '../utils/formatters';
+import { formatRupiah } from '../utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
 
-const isEditMode = computed(() => !!route.params.id);
+const isEditMode = computed(() => Boolean(route.params.id));
 const isAdmin = computed(() => store.currentUser?.role === 'Admin');
 
-// Operator users list for admin combobox
-const operatorUsers = computed(() => store.userList.filter(u => u.role === 'Operator' && !u.isLocked));
+const operatorList = computed(() => {
+  return (store.userList || []).filter(u => !u.isLocked);
+});
 
-// Form State
 const form = reactive({
-  operatorId: '',
+  operatorId: store.currentUser?.id || 1,
+  tanggal: new Date().toISOString().split('T')[0],
   kategoriId: '',
   subKategoriId: '',
-  tanggal: new Date().toISOString().slice(0, 10),
   asalBarang: '',
   nomorSurat: '',
   lampiranName: '',
   items: [
     {
-      id: 1,
+      id: 'item-1',
       namaBarang: '',
       harga: 0,
+      hargaFormatted: 'Rp 0',
       jumlah: 1,
-      satuan: 'Pcs',
+      satuan: 'Unit',
       total: 0,
       expiredDate: ''
     }
   ]
 });
 
-const errors = reactive({
-  kategoriId: '',
-  subKategoriId: '',
-  asalBarang: '',
-  tanggal: ''
-});
-
-// Dynamic sub categories filtered by category
+// Filter subkategori
 const filteredSubKategori = computed(() => {
   if (!form.kategoriId) return [];
   return store.subKategoriList.filter(s => s.kategoriId === Number(form.kategoriId));
@@ -490,178 +329,226 @@ const selectedSubKategori = computed(() => {
   return store.subKategoriList.find(s => s.id === Number(form.subKategoriId));
 });
 
-const batasHargaSubKategori = computed(() => {
-  return selectedSubKategori.value ? selectedSubKategori.value.batasHarga : 0;
-});
-
-// Grand total calculation
-const grandTotal = computed(() => {
-  return form.items.reduce((acc, it) => acc + (Number(it.total) || 0), 0);
-});
-
-// Over budget limit check (Critical requirement!)
-const isOverLimit = computed(() => {
-  if (!selectedSubKategori.value) return false;
-  return grandTotal.value > batasHargaSubKategori.value;
-});
-
 function handleKategoriChange() {
   form.subKategoriId = '';
 }
 
-// Item row actions
-let nextItemId = 2;
+// Format numeric to rupiah input mask
+function formatMaskRupiah(val) {
+  const num = typeof val === 'number' ? val : parseInt(String(val).replace(/\D/g, ''), 10) || 0;
+  return 'Rp ' + num.toLocaleString('id-ID');
+}
+
+function onHargaInput(idx, rawValue) {
+  const cleanNumber = parseInt(String(rawValue).replace(/\D/g, ''), 10) || 0;
+  form.items[idx].harga = cleanNumber;
+  form.items[idx].hargaFormatted = formatMaskRupiah(cleanNumber);
+  recalculateItemTotal(idx);
+}
+
+function recalculateItemTotal(idx) {
+  const item = form.items[idx];
+  const jml = Number(item.jumlah) || 0;
+  item.total = item.harga * jml;
+}
+
+const totalKeseluruhan = computed(() => {
+  return form.items.reduce((sum, it) => sum + (it.total || 0), 0);
+});
+
+// Important validation rule: Total cannot exceed Batas Harga
+const isOverLimit = computed(() => {
+  if (!selectedSubKategori.value) return false;
+  return totalKeseluruhan.value > selectedSubKategori.value.batasHarga;
+});
+
 function addItemRow() {
   form.items.push({
-    id: nextItemId++,
+    id: 'item-' + Date.now(),
     namaBarang: '',
     harga: 0,
+    hargaFormatted: 'Rp 0',
     jumlah: 1,
-    satuan: 'Pcs',
+    satuan: 'Unit',
     total: 0,
     expiredDate: ''
   });
 }
 
-function removeItemRow(index) {
+function removeItemRow(idx) {
   if (form.items.length > 1) {
-    form.items.splice(index, 1);
+    form.items.splice(idx, 1);
   }
 }
 
-function handlePriceInput(item, event) {
-  const raw = event.target.value;
-  const num = parseRupiah(raw);
-  item.harga = num;
-  recalculateRow(item);
-}
-
-function recalculateRow(item) {
-  const qty = Number(item.jumlah) || 0;
-  item.total = (Number(item.harga) || 0) * qty;
-}
-
-// File upload mockup
-function handleFileUpload(event) {
-  const file = event.target.files?.[0];
+function handleFileUpload(e) {
+  const file = e.target.files[0];
   if (file) {
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (!['doc', 'docx', 'zip'].includes(ext)) {
-      alert('Format file tidak didukung! Harap unggah file dengan ekstensi .doc, .docx, atau .zip');
-      event.target.value = '';
-      return;
-    }
     form.lampiranName = file.name;
   }
 }
 
-function removeFile() {
-  form.lampiranName = '';
-}
-
-// Load data if edit mode
+// Prefill if edit mode
 onMounted(() => {
-  // If not admin, lock operator to current user
-  if (!isAdmin.value) {
-    form.operatorId = store.currentUser?.id;
-  } else if (!form.operatorId) {
-    form.operatorId = operatorUsers.value[0]?.id || store.currentUser?.id;
-  }
-
   if (isEditMode.value) {
-    const id = Number(route.params.id);
-    const existing = store.barangMasukList.find(b => b.id === id);
+    const existing = store.barangMasukList.find(b => b.id === Number(route.params.id));
     if (existing) {
       form.operatorId = existing.operatorId;
+      form.tanggal = existing.tanggal;
       form.kategoriId = existing.kategoriId;
       form.subKategoriId = existing.subKategoriId;
-      form.tanggal = existing.tanggal;
       form.asalBarang = existing.asalBarang;
       form.nomorSurat = existing.nomorSurat || '';
       form.lampiranName = existing.lampiranName || '';
-      form.items = existing.items.map((it, idx) => ({
-        id: idx + 1,
-        namaBarang: it.namaBarang,
-        harga: it.harga,
-        jumlah: it.jumlah,
-        satuan: it.satuan,
-        total: it.total,
-        expiredDate: it.expiredDate || ''
+      form.items = (existing.items || []).map(it => ({
+        ...it,
+        hargaFormatted: formatMaskRupiah(it.harga),
+        total: it.harga * it.jumlah
       }));
     } else {
-      store.showToast('Data barang masuk tidak ditemukan!', 'error');
+      store.showToast('Data barang masuk tidak ditemukan', 'error');
       router.push('/barang-masuk');
     }
+  } else {
+    // default operator to current logged in
+    form.operatorId = store.currentUser?.id || 1;
   }
 });
 
-// Submit form
-function handleSubmit() {
-  errors.kategoriId = '';
-  errors.subKategoriId = '';
-  errors.asalBarang = '';
-  errors.tanggal = '';
+// Format numbers with thousand separator dots (e.g. 500.000)
+function formatNumberOnly(val) {
+  if (val === null || val === undefined || val === '') return '';
+  const num = typeof val === 'string' ? parseInt(val.replace(/\D/g, ''), 10) || 0 : Math.round(val);
+  return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+}
 
-  let valid = true;
+function handleSubmit() {
   if (!form.kategoriId) {
-    errors.kategoriId = 'Kategori wajib dipilih!';
-    valid = false;
+    store.showToast('Kategori wajib dipilih!', 'error');
+    return;
   }
   if (!form.subKategoriId) {
-    errors.subKategoriId = 'Sub Kategori wajib dipilih!';
-    valid = false;
+    store.showToast('Sub Kategori wajib dipilih!', 'error');
+    return;
   }
   if (!form.asalBarang.trim()) {
-    errors.asalBarang = 'Asal Barang wajib diisi!';
-    valid = false;
-  }
-  if (!form.tanggal) {
-    errors.tanggal = 'Tanggal Masuk wajib diisi!';
-    valid = false;
+    store.showToast('Asal barang wajib diisi!', 'error');
+    return;
   }
 
   // Check item rows
   for (let i = 0; i < form.items.length; i++) {
     const it = form.items[i];
-    if (!it.namaBarang.trim() || it.harga <= 0 || it.jumlah <= 0 || !it.satuan.trim()) {
-      alert(`Harap lengkapi baris item #${i + 1} (Nama barang, harga > 0, jumlah > 0, dan satuan wajib diisi).`);
+    if (!it.namaBarang.trim()) {
+      store.showToast(`Baris #${i + 1}: Nama barang wajib diisi!`, 'error');
+      return;
+    }
+    if (it.harga <= 0) {
+      store.showToast(`Baris #${i + 1}: Harga barang harus lebih dari 0!`, 'error');
+      return;
+    }
+    if (it.jumlah <= 0) {
+      store.showToast(`Baris #${i + 1}: Jumlah barang minimal 1!`, 'error');
+      return;
+    }
+    if (!it.satuan.trim()) {
+      store.showToast(`Baris #${i + 1}: Satuan barang wajib diisi!`, 'error');
       return;
     }
   }
 
-  // Crucial validation: Cannot exceed batas harga
   if (isOverLimit.value) {
-    alert(`Total harga pengadaan (${formatRupiah(grandTotal.value)}) melebihi batas harga Sub Kategori (${formatRupiah(batasHargaSubKategori.value)})!`);
+    store.showToast('Validasi gagal: Total harga melebihi batas plafon sub kategori!', 'error');
     return;
   }
 
-  if (!valid) return;
+  const selectedKat = store.kategoriList.find(k => k.id === Number(form.kategoriId));
+  const selectedSub = selectedSubKategori.value;
+  const selectedOp = (store.userList || []).find(u => u.id === Number(form.operatorId)) || store.currentUser;
+  const yearStr = new Date(form.tanggal).getFullYear().toString();
 
   const payload = {
-    operatorId: form.operatorId,
-    kategoriId: Number(form.kategoriId),
-    subKategoriId: Number(form.subKategoriId),
     tanggal: form.tanggal,
-    asalBarang: form.asalBarang,
-    nomorSurat: form.nomorSurat,
+    tahun: yearStr,
+    nomorSurat: form.nomorSurat.trim(),
+    asalBarang: form.asalBarang.trim(),
+    kategoriId: Number(form.kategoriId),
+    kategoriNama: selectedKat?.nama || '',
+    subKategoriId: Number(form.subKategoriId),
+    subKategoriNama: selectedSub?.nama || '',
+    batasHargaSubKategori: selectedSub?.batasHarga || 0,
+    operatorId: Number(form.operatorId),
+    operatorNama: selectedOp?.nama || store.currentUser?.nama,
     lampiranName: form.lampiranName,
     items: form.items.map(it => ({
-      namaBarang: it.namaBarang,
+      id: it.id,
+      namaBarang: it.namaBarang.trim(),
       harga: Number(it.harga),
       jumlah: Number(it.jumlah),
-      satuan: it.satuan,
-      total: Number(it.total),
-      expiredDate: it.expiredDate
+      satuan: it.satuan.trim(),
+      total: it.harga * it.jumlah,
+      expiredDate: it.expiredDate || ''
     })),
-    totalHarga: grandTotal.value
+    totalHarga: totalKeseluruhan.value
   };
 
   if (isEditMode.value) {
     store.updateBarangMasuk(Number(route.params.id), payload);
+    store.showToast('Data barang masuk berhasil diperbarui!', 'success');
   } else {
     store.addBarangMasuk(payload);
+    store.showToast('Data barang masuk berhasil disimpan!', 'success');
   }
 
   router.push('/barang-masuk');
 }
 </script>
+
+<style scoped>
+.btn-action-add,
+.btn-action-remove {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  cursor: pointer;
+  outline: none;
+  border: none;
+}
+
+.btn-action-add svg,
+.btn-action-remove svg {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-shrink: 0;
+}
+
+.btn-action-add {
+  border: 1.5px solid #63b3ed !important;
+  background-color: #ebf8ff;
+  color: #3182ce;
+  transition: all 0.2s ease;
+}
+
+.btn-action-add:hover {
+  background-color: #bee3f8;
+  color: #2b6cb0;
+}
+
+.btn-action-remove {
+  background-color: #e53e3e;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-action-remove:hover {
+  background-color: #c53030;
+}
+</style>

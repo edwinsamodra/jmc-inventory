@@ -1,405 +1,393 @@
 <template>
-  <div class="space-y-6">
-    <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div>
+    <!-- Header Section (Breadcrumb + Title) -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
       <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+        <div class="text-uppercase small fw-bold text-muted mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+          HOME &nbsp;/&nbsp; BARANG MASUK
+        </div>
+        <h2 class="h1 fw-bold text-dark mb-0">
           Barang Masuk
-        </h1>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">
-          Kelola penerimaan barang, riwayat transaksi, verifikasi, dan cetak surat masuk.
-        </p>
+        </h2>
       </div>
-
-      <div class="flex items-center space-x-2.5">
-        <!-- Export Excel Button -->
+      <div>
+        <!-- Export Excel action placed neatly on header -->
         <button
           @click="handleExportExcel"
           type="button"
-          class="inline-flex items-center px-3.5 py-2 border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs sm:text-sm font-semibold transition shadow-2xs"
-          title="Export data sesuai filter dan kata kunci pencarian ke file Excel (.xlsx)"
+          class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1 shadow-sm"
+          title="Export Data ke Excel (.xlsx)"
         >
-          <svg class="w-4 h-4 mr-1.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+            <line x1="8" y1="11" x2="16" y2="19" />
+            <line x1="16" y1="11" x2="8" y2="19" />
           </svg>
-          Export Excel
+          <span>Export Excel</span>
         </button>
-
-        <!-- Tambah Barang Masuk Button -->
-        <RouterLink
-          to="/barang-masuk/tambah"
-          class="inline-flex items-center px-4 py-2 border border-transparent bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs sm:text-sm font-semibold transition shadow-xs"
-        >
-          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Tambah Barang Masuk
-        </RouterLink>
       </div>
     </div>
 
-    <!-- Filter & Search Toolbar Card -->
-    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <!-- 1. Search Box (asal barang atau sub kategori) -->
-        <div class="relative">
-          <label class="block text-2xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-            Pencarian
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <input
-              v-model="filters.search"
-              type="text"
-              placeholder="Asal barang / Sub kategori..."
-              class="block w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-            />
-          </div>
-        </div>
+    <!-- Filter & Toolbar Row matching Screenshot and CSV -->
+    <div class="row align-items-center g-2 mb-3">
+      <!-- Left: Button "+ Tambah Data" -->
+      <div class="col-auto">
+        <RouterLink
+          to="/barang-masuk/tambah"
+          class="btn btn-primary d-inline-flex align-items-center gap-1 px-3 py-2 fw-semibold"
+          style="background-color: #216ac4; border-color: #216ac4;"
+        >
+          <span class="fs-4 lh-1">+</span>
+          <span>Tambah Data</span>
+        </RouterLink>
+      </div>
 
-        <!-- 2. Filter Kategori -->
-        <div>
-          <label class="block text-2xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-            Filter Kategori
-          </label>
+      <!-- Right: Dropdowns & Search grouped together matching Screenshot & CSV -->
+      <div class="col-auto ms-auto d-flex flex-wrap align-items-center gap-2">
+        <!-- 1. Filter Kategori -->
+        <div style="min-width: 170px;">
           <select
             v-model="filters.kategoriId"
             @change="onKategoriChange"
-            class="block w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
+            class="form-select bg-white"
           >
-            <option :value="''">-- Semua Kategori --</option>
+            <option :value="''">Semua Kategori</option>
             <option v-for="kat in store.kategoriList" :key="kat.id" :value="kat.id">
               {{ kat.kode }} - {{ kat.nama }}
             </option>
           </select>
         </div>
 
-        <!-- 3. Filter Sub Kategori (menyesuaikan Kategori yang dipilih) -->
-        <div>
-          <label class="block text-2xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-            Filter Sub Kategori
-          </label>
+        <!-- 2. Filter Sub Kategori -->
+        <div style="min-width: 180px;">
           <select
             v-model="filters.subKategoriId"
             :disabled="!filters.kategoriId && availableSubKategori.length === 0"
-            class="block w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition disabled:opacity-60 disabled:cursor-not-allowed"
+            class="form-select bg-white"
           >
-            <option :value="''">
-              {{ filters.kategoriId ? '-- Semua Sub Kategori --' : '-- Pilih Kategori Dahulu --' }}
-            </option>
+            <option :value="''">Semua Sub Kategori</option>
             <option v-for="sub in availableSubKategori" :key="sub.id" :value="sub.id">
               {{ sub.nama }}
             </option>
           </select>
         </div>
 
-        <!-- 4. Filter Tahun Data -->
-        <div>
-          <label class="block text-2xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-            Filter Tahun
-          </label>
-          <div class="flex space-x-2">
-            <select
-              v-model="filters.tahun"
-              class="block w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition"
-            >
-              <option :value="''">-- Semua Tahun --</option>
-              <option v-for="yr in yearOptions" :key="yr" :value="yr">
-                Tahun {{ yr }}
-              </option>
-            </select>
-
-            <button
-              v-if="hasActiveFilters"
-              @click="resetFilters"
-              type="button"
-              class="px-2.5 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
-              title="Reset Semua Filter"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filter Stats & Sorting Chips -->
-      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
-        <div>
-          Ditemukan <strong class="text-slate-800 font-semibold">{{ filteredData.length }}</strong> data barang masuk
-          <span v-if="hasActiveFilters" class="text-brand-600 font-medium">(Terfilter)</span>
+        <!-- 3. Filter Tahun -->
+        <div style="min-width: 140px;">
+          <select
+            v-model="filters.tahun"
+            class="form-select bg-white"
+          >
+            <option :value="''">Semua Tahun</option>
+            <option v-for="yr in yearOptions" :key="yr" :value="yr">
+              {{ yr }}
+            </option>
+          </select>
         </div>
 
-        <div class="flex items-center space-x-3">
-          <span class="text-2xs uppercase tracking-wider font-bold text-slate-400">Urutkan:</span>
-          <!-- Sort Tanggal -->
-          <button
-            @click="toggleSort('tanggal')"
-            type="button"
-            class="flex items-center space-x-1 px-2.5 py-1 rounded-lg border text-2xs font-semibold transition"
-            :class="sortBy === 'tanggal' ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 hover:bg-slate-50 text-slate-600'"
-          >
-            <span>Tanggal</span>
-            <span v-if="sortBy === 'tanggal'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
-          </button>
-
-          <!-- Sort Asal Barang -->
-          <button
-            @click="toggleSort('asalBarang')"
-            type="button"
-            class="flex items-center space-x-1 px-2.5 py-1 rounded-lg border text-2xs font-semibold transition"
-            :class="sortBy === 'asalBarang' ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 hover:bg-slate-50 text-slate-600'"
-          >
-            <span>Asal Barang</span>
-            <span v-if="sortBy === 'asalBarang'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
-          </button>
-
-          <!-- Sort Total Harga -->
-          <button
-            @click="toggleSort('totalHarga')"
-            type="button"
-            class="flex items-center space-x-1 px-2.5 py-1 rounded-lg border text-2xs font-semibold transition"
-            :class="sortBy === 'totalHarga' ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-200 hover:bg-slate-50 text-slate-600'"
-          >
-            <span>Total Harga</span>
-            <span v-if="sortBy === 'totalHarga'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
+        <!-- 4. Search input with magnifying glass button -->
+        <div class="input-group" style="width: 220px;">
+          <input
+            v-model="filters.search"
+            type="text"
+            placeholder="Cari data.."
+            class="form-control bg-white"
+          />
+          <button class="btn btn-outline-secondary bg-white text-secondary" type="button" title="Cari">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <circle cx="10" cy="10" r="7" />
+              <line x1="21" y1="21" x2="15" y2="15" />
+            </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Table Card -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+    <!-- Table Card matching Screenshot and CSV Structure -->
+    <div class="card shadow-sm border-0 mb-4 bg-white">
+      <div class="table-responsive">
+        <table class="table table-vcenter align-middle mb-0 custom-dashboard-table">
           <thead>
-            <tr class="bg-slate-50/75 border-b border-slate-200 text-2xs uppercase tracking-wider font-bold text-slate-500">
-              <th class="py-3.5 px-4 text-center w-12">No</th>
-              <th class="py-3.5 px-4 cursor-pointer hover:text-slate-800" @click="toggleSort('tanggal')">
-                <div class="flex items-center space-x-1">
-                  <span>Tanggal</span>
-                  <span v-if="sortBy === 'tanggal'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
-                </div>
+            <tr class="text-uppercase text-secondary small fw-bold" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+              <th class="text-center py-3" style="width: 45px;">NO</th>
+              <th class="py-3" style="width: 100px;">ACTION</th>
+              <th class="py-3 cursor-pointer" @click="toggleSort('tanggal')" style="width: 140px;">
+                TANGGAL {{ sortBy === 'tanggal' ? (sortDir === 'asc' ? '▲' : '▼') : '' }}
               </th>
-              <th class="py-3.5 px-4">No. Surat</th>
-              <th class="py-3.5 px-4 cursor-pointer hover:text-slate-800" @click="toggleSort('asalBarang')">
-                <div class="flex items-center space-x-1">
-                  <span>Asal Barang</span>
-                  <span v-if="sortBy === 'asalBarang'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
-                </div>
+              <th class="py-3 cursor-pointer" @click="toggleSort('asalBarang')" style="min-width: 160px;">
+                ASAL BARANG {{ sortBy === 'asalBarang' ? (sortDir === 'asc' ? '▲' : '▼') : '' }}
               </th>
-              <th class="py-3.5 px-4">Kategori & Sub Kategori</th>
-              <th class="py-3.5 px-4">Operator</th>
-              <th class="py-3.5 px-4 text-right cursor-pointer hover:text-slate-800" @click="toggleSort('totalHarga')">
-                <div class="flex items-center justify-end space-x-1">
-                  <span>Total Harga</span>
-                  <span v-if="sortBy === 'totalHarga'">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
-                </div>
+              <th class="py-3" style="width: 110px;">PENERIMA</th>
+              <th class="py-3" style="width: 130px;">UNIT</th>
+              <th class="py-3" style="width: 100px;">KODE</th>
+              <th class="py-3" style="min-width: 170px;">NAMA</th>
+              <th class="text-end py-3" style="width: 110px;">HARGA (RP.)</th>
+              <th class="text-center py-3" style="width: 90px;">JUMLAH</th>
+              <th class="text-end py-3 cursor-pointer" @click="toggleSort('totalHarga')" style="width: 120px;">
+                TOTAL (RP.) {{ sortBy === 'totalHarga' ? (sortDir === 'asc' ? '▲' : '▼') : '' }}
               </th>
-              <th class="py-3.5 px-4 text-center">Aksi Dokumen</th>
-              <!-- Kolom Paling Kanan Sesuai BRIEF: Status verifikasi toggle button dengan centang hijau -->
-              <th class="py-3.5 px-4 text-center w-32 bg-slate-100/50">
-                Verifikasi
-              </th>
+              <th class="text-center py-3" style="width: 75px;">STATUS</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr
-              v-for="(item, index) in paginatedData"
-              :key="item.id"
-              class="hover:bg-slate-50/80 transition"
-            >
-              <!-- No -->
-              <td class="py-3 px-4 text-center text-slate-400 font-medium text-xs">
-                {{ (currentPage - 1) * pageSize + index + 1 }}
-              </td>
-
-              <!-- Tanggal -->
-              <td class="py-3 px-4 whitespace-nowrap">
-                <div class="font-medium text-slate-800">{{ formatDateIndo(item.tanggal) }}</div>
-                <div class="text-2xs text-slate-400">Tahun {{ item.tahun }}</div>
-              </td>
-
-              <!-- No. Surat -->
-              <td class="py-3 px-4 whitespace-nowrap">
-                <span class="font-mono text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
-                  {{ item.nomorSurat || '-' }}
-                </span>
-                <div v-if="item.lampiranName" class="text-2xs text-brand-600 mt-1 flex items-center">
-                  <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                  </svg>
-                  <span class="truncate max-w-[120px]">{{ item.lampiranName }}</span>
+          <tbody>
+            <!-- Empty state -->
+            <tr v-if="paginatedData.length === 0">
+              <td colspan="12" class="text-center py-5 text-secondary">
+                <div class="py-3">
+                  <p class="fw-bold mb-1">Tidak ada data barang masuk</p>
+                  <p class="small text-muted mb-0">Coba sesuaikan filter pencarian atau tambahkan data barang masuk baru.</p>
                 </div>
               </td>
+            </tr>
 
-              <!-- Asal Barang -->
-              <td class="py-3 px-4">
-                <div class="font-semibold text-slate-800">{{ item.asalBarang }}</div>
-                <div class="text-2xs text-slate-500">{{ item.items?.length || 0 }} item barang</div>
-              </td>
+            <!-- Document Data Rows grouped with Rowspan according to Screenshot & CSV -->
+            <template v-for="(doc, docIndex) in paginatedData" :key="doc.id">
+              <!-- First row of document (contains grouped columns with rowspan) -->
+              <tr class="doc-start-row">
+                <!-- NO -->
+                <td
+                  :rowspan="doc.items?.length || 1"
+                  class="text-center align-middle fw-medium text-dark rowspan-cell"
+                >
+                  {{ (currentPage - 1) * pageSize + docIndex + 1 }}
+                </td>
 
-              <!-- Kategori & Sub Kategori -->
-              <td class="py-3 px-4">
-                <span class="inline-block text-2xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                  {{ item.kategoriNama }}
-                </span>
-                <div class="font-medium text-slate-700 mt-0.5">{{ item.subKategoriNama }}</div>
-              </td>
-
-              <!-- Operator -->
-              <td class="py-3 px-4 whitespace-nowrap">
-                <div class="text-xs font-medium text-slate-700">{{ item.operatorNama }}</div>
-              </td>
-
-              <!-- Total Harga -->
-              <td class="py-3 px-4 text-right whitespace-nowrap">
-                <div class="font-bold text-slate-900">{{ formatRupiah(item.totalHarga) }}</div>
-                <div class="text-2xs text-slate-400">Maks: {{ formatRupiah(item.batasHargaSubKategori) }}</div>
-              </td>
-
-              <!-- Aksi Dokumen -->
-              <td class="py-3 px-4 text-center whitespace-nowrap">
-                <div class="inline-flex items-center space-x-1">
-                  <!-- Cetak Surat Masuk Button -->
-                  <button
-                    @click="openPrintModal(item)"
-                    type="button"
-                    class="p-1.5 text-brand-600 hover:text-brand-800 hover:bg-brand-50 rounded-lg transition"
-                    title="Cetak Surat Masuk / Bukti Penerimaan"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                  </button>
-
-                  <!-- Detail Button -->
-                  <button
-                    @click="openDetailModal(item)"
-                    type="button"
-                    class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition"
-                    title="Lihat Rincian Item"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  </button>
-
-                  <!-- Edit Button -->
+                <!-- ACTION: ✏️ Edit, 📝 Print / Surat, 🗑️ Delete -->
+                <td
+                  :rowspan="doc.items?.length || 1"
+                  class="align-middle text-nowrap rowspan-cell"
+                >
+                  <!-- Edit ✏️ -->
                   <RouterLink
-                    :to="`/barang-masuk/edit/${item.id}`"
-                    class="p-1.5 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg transition"
-                    title="Ubah Data"
+                    :to="`/barang-masuk/edit/${doc.id}`"
+                    class="text-secondary text-decoration-none p-1 hover-primary d-inline-block"
+                    title="Edit Data"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
                     </svg>
                   </RouterLink>
 
-                  <!-- Delete Button -->
+                  <!-- Cetak Surat / Dokumen 📝 -->
                   <button
-                    @click="confirmDelete(item)"
                     type="button"
-                    class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition"
+                    @click="openPrintModal(doc)"
+                    class="btn p-1 border-0 bg-transparent text-secondary hover-primary d-inline-block"
+                    title="Cetak Surat Masuk"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                      <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                      <line x1="9" y1="9" x2="10" y2="9" />
+                      <line x1="9" y1="13" x2="15" y2="13" />
+                      <line x1="9" y1="17" x2="15" y2="17" />
+                    </svg>
+                  </button>
+
+                  <!-- Hapus 🗑️ -->
+                  <button
+                    type="button"
+                    @click="confirmDelete(doc)"
+                    class="btn p-1 border-0 bg-transparent text-danger d-inline-block"
                     title="Hapus Data"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm text-danger" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <line x1="4" y1="7" x2="20" y2="7" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                      <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
                     </svg>
                   </button>
-                </div>
-              </td>
+                </td>
 
-              <!-- Status Verifikasi Kolom Paling Kanan (Brief requirement) -->
-              <td class="py-3 px-4 text-center whitespace-nowrap bg-slate-50/50">
-                <button
-                  @click="store.toggleVerifikasiBarangMasuk(item.id)"
-                  type="button"
-                  class="inline-flex items-center px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition group shadow-2xs"
-                  :class="item.isVerified
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
-                    : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-50'"
-                  :title="item.isVerified ? 'Data sudah diverifikasi. Klik untuk membatalkan' : 'Klik untuk memverifikasi data'"
+                <!-- TANGGAL: DD/MM/YY HH:mm:ss -->
+                <td
+                  :rowspan="doc.items?.length || 1"
+                  class="align-middle text-nowrap rowspan-cell"
                 >
-                  <!-- Centang Hijau Icon -->
-                  <span
-                    class="w-5 h-5 rounded-full flex items-center justify-center mr-1.5 transition"
-                    :class="item.isVerified ? 'bg-emerald-500 text-white shadow-xs' : 'bg-slate-200 text-slate-400 group-hover:bg-slate-300'"
-                  >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </span>
-                  <span class="text-2xs">
-                    {{ item.isVerified ? 'Diverifikasi' : 'Belum' }}
-                  </span>
-                </button>
-              </td>
-            </tr>
+                  {{ formatDateTime(doc.tanggal) }}
+                </td>
 
-            <!-- Empty State -->
-            <tr v-if="filteredData.length === 0">
-              <td colspan="9" class="py-12 text-center text-slate-400">
-                <div class="max-w-sm mx-auto">
-                  <svg class="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
-                  <p class="font-medium text-slate-600">Tidak ada data barang masuk</p>
-                  <p class="text-xs text-slate-400 mt-1">Coba sesuaikan filter pencarian atau buat data barang masuk baru.</p>
+                <!-- ASAL BARANG -->
+                <td
+                  :rowspan="doc.items?.length || 1"
+                  class="align-middle fw-semibold text-dark rowspan-cell"
+                >
+                  {{ doc.asalBarang }}
+                </td>
+
+                <!-- PENERIMA -->
+                <td
+                  :rowspan="doc.items?.length || 1"
+                  class="align-middle text-dark rowspan-cell"
+                >
+                  {{ doc.operatorNama || 'Liana' }}
+                </td>
+
+                <!-- UNIT -->
+                <td
+                  :rowspan="doc.items?.length || 1"
+                  class="align-middle text-dark rowspan-cell"
+                >
+                  {{ doc.unit || 'Gudang Utama' }}
+                </td>
+
+                <!-- ITEM #1 DETAILS -->
+                <!-- KODE -->
+                <td class="text-secondary item-cell">
+                  {{ doc.items && doc.items[0] ? (doc.items[0].kode || getItemKode(doc, 0)) : '-' }}
+                </td>
+
+                <!-- NAMA -->
+                <td class="text-dark item-cell">
+                  {{ doc.items && doc.items[0] ? doc.items[0].namaBarang : '-' }}
+                </td>
+
+                <!-- HARGA (RP.) -->
+                <td class="text-end item-cell">
+                  {{ doc.items && doc.items[0] ? formatNumberOnly(doc.items[0].harga) : '-' }}
+                </td>
+
+                <!-- JUMLAH -->
+                <td class="text-center item-cell">
+                  {{ doc.items && doc.items[0] ? `${doc.items[0].jumlah} ${doc.items[0].satuan || ''}` : '-' }}
+                </td>
+
+                <!-- TOTAL (RP.) -->
+                <td class="text-end fw-semibold item-cell">
+                  {{ doc.items && doc.items[0] ? formatNumberOnly(doc.items[0].total) : '-' }}
+                </td>
+
+                <!-- STATUS (Clickable toggle verification) -->
+                <td
+                  class="text-center align-middle item-cell"
+                  style="border-left: 1px solid #f1f5f9;"
+                >
                   <button
-                    v-if="hasActiveFilters"
-                    @click="resetFilters"
-                    class="mt-3 inline-flex items-center px-3 py-1.5 text-xs text-brand-600 hover:underline font-semibold"
+                    type="button"
+                    @click="store.toggleVerifikasiBarangMasuk(doc.id)"
+                    class="btn p-0 border-0 bg-transparent"
+                    :title="doc.isVerified ? 'Diverifikasi. Klik untuk membatalkan' : 'Belum diverifikasi. Klik untuk verifikasi'"
                   >
-                    Hapus Filter
+                    <!-- Green checkmark circle if verified -->
+                    <svg v-if="doc.isVerified" xmlns="http://www.w3.org/2000/svg" class="icon text-success" width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M9 12l2 2l4 -4" />
+                    </svg>
+                    <!-- Gray dash circle if unverified (-) -->
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="icon text-secondary" width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <circle cx="12" cy="12" r="9" />
+                      <line x1="9" y1="12" x2="15" y2="12" />
+                    </svg>
                   </button>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
+
+              <!-- Subsequent Item Rows of the same document (if items.length > 1) -->
+              <template v-if="doc.items && doc.items.length > 1">
+                <tr
+                  v-for="(it, itIdx) in doc.items.slice(1)"
+                  :key="it.id || itIdx"
+                  class="doc-sub-row"
+                >
+                  <!-- KODE -->
+                  <td class="text-secondary item-cell">
+                    {{ it.kode || getItemKode(doc, itIdx + 1) }}
+                  </td>
+
+                  <!-- NAMA -->
+                  <td class="text-dark item-cell">
+                    {{ it.namaBarang }}
+                  </td>
+
+                  <!-- HARGA (RP.) -->
+                  <td class="text-end item-cell">
+                    {{ formatNumberOnly(it.harga) }}
+                  </td>
+
+                  <!-- JUMLAH -->
+                  <td class="text-center item-cell">
+                    {{ `${it.jumlah} ${it.satuan || ''}` }}
+                  </td>
+
+                  <!-- TOTAL (RP.) -->
+                  <td class="text-end fw-semibold item-cell">
+                    {{ formatNumberOnly(it.total) }}
+                  </td>
+
+                  <!-- STATUS (Follows document status) -->
+                  <td
+                    class="text-center align-middle item-cell"
+                    style="border-left: 1px solid #f1f5f9;"
+                  >
+                    <button
+                      type="button"
+                      @click="store.toggleVerifikasiBarangMasuk(doc.id)"
+                      class="btn p-0 border-0 bg-transparent"
+                      :title="doc.isVerified ? 'Diverifikasi. Klik untuk membatalkan' : 'Belum diverifikasi. Klik untuk verifikasi'"
+                    >
+                      <svg v-if="doc.isVerified" xmlns="http://www.w3.org/2000/svg" class="icon text-success" width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M9 12l2 2l4 -4" />
+                      </svg>
+                      <svg v-else xmlns="http://www.w3.org/2000/svg" class="icon text-secondary" width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <circle cx="12" cy="12" r="9" />
+                        <line x1="9" y1="12" x2="15" y2="12" />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </template>
           </tbody>
         </table>
       </div>
 
-      <!-- Pagination Footer (10 data per halaman sesuai Brief) -->
-      <div class="px-4 py-3 sm:px-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-        <div>
-          Menampilkan
-          <strong class="font-semibold text-slate-900">{{ startIndex + 1 }}</strong> -
-          <strong class="font-semibold text-slate-900">{{ Math.min(endIndex, filteredData.length) }}</strong>
-          dari <strong class="font-semibold text-slate-900">{{ filteredData.length }}</strong> data
-        </div>
-
-        <div class="flex items-center space-x-1.5">
-          <button
-            @click="currentPage--"
-            :disabled="currentPage <= 1"
-            class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-medium"
+      <!-- Pagination Footer matching Screenshot (e.g. 1, 2, 3, 4, 5, next >) -->
+      <div class="card-footer bg-white border-0 py-3 d-flex justify-content-end align-items-center">
+        <ul class="pagination m-0 align-items-center gap-1">
+          <!-- Page numbers -->
+          <li
+            v-for="page in totalPages"
+            :key="page"
+            class="page-item"
+            :class="{ active: currentPage === page }"
           >
-            Sebelumnya
-          </button>
-
-          <template v-for="page in totalPages" :key="page">
             <button
+              class="page-link border-0 fw-semibold rounded"
+              :style="currentPage === page ? 'background-color: #2b6cb0; color: white;' : 'background-color: transparent; color: #4a5568;'"
               @click="currentPage = page"
-              class="w-8 h-8 rounded-lg font-semibold transition"
-              :class="currentPage === page ? 'bg-brand-600 text-white shadow-2xs' : 'border border-slate-200 hover:bg-slate-50 text-slate-700'"
             >
               {{ page }}
             </button>
-          </template>
+          </li>
 
-          <button
-            @click="currentPage++"
-            :disabled="currentPage >= totalPages"
-            class="px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-medium"
-          >
-            Berikutnya
-          </button>
-        </div>
+          <!-- Next link -->
+          <li class="page-item" :class="{ disabled: currentPage >= totalPages }">
+            <button
+              class="page-link border-0 text-secondary bg-transparent d-flex align-items-center gap-1"
+              @click="currentPage++"
+            >
+              <span>next</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -431,7 +419,6 @@
 <script setup>
 import { reactive, ref, computed } from 'vue';
 import { store } from '../store/mockStore';
-import { formatRupiah, formatDateIndo } from '../utils/formatters';
 import { exportBarangMasukToExcel } from '../utils/exportExcel';
 import PrintLetterModal from '../components/PrintLetterModal.vue';
 import DetailBarangModal from '../components/DetailBarangModal.vue';
@@ -449,13 +436,13 @@ const filters = reactive({
 const sortBy = ref('tanggal');
 const sortDir = ref('desc');
 
-// Pagination state: 10 per page
+// Pagination state: 5 per page matching screenshot reference
 const currentPage = ref(1);
-const pageSize = 10;
+const pageSize = 5;
 
 // Dynamic sub-category choices based on selected category
 const availableSubKategori = computed(() => {
-  if (!filters.kategoriId) return [];
+  if (!filters.kategoriId) return store.subKategoriList;
   return store.subKategoriList.filter(s => s.kategoriId === Number(filters.kategoriId));
 });
 
@@ -467,23 +454,35 @@ function onKategoriChange() {
 // Year options extracted from data
 const yearOptions = computed(() => {
   const years = new Set(store.barangMasukList.map(b => b.tahun || new Date(b.tanggal).getFullYear().toString()));
-  // ensure recent years present
   years.add('2026');
   years.add('2025');
   years.add('2024');
+  years.add('2023');
   return Array.from(years).sort().reverse();
 });
 
-const hasActiveFilters = computed(() => {
-  return filters.search || filters.kategoriId || filters.subKategoriId || filters.tahun;
-});
+// Format numbers with thousand separator dots (e.g. 61.000)
+function formatNumberOnly(val) {
+  if (val === null || val === undefined || val === '') return '0';
+  const num = typeof val === 'string' ? parseInt(val.replace(/\D/g, ''), 10) || 0 : Math.round(val);
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
 
-function resetFilters() {
-  filters.search = '';
-  filters.kategoriId = '';
-  filters.subKategoriId = '';
-  filters.tahun = '';
-  currentPage.value = 1;
+// Format date to DD/MM/YY HH:mm:ss matching screenshot (e.g. 04/10/23 10:00:00)
+function formatDateTime(dateStr) {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = String(d.getFullYear()).slice(-2);
+  return `${day}/${month}/${year} 10:00:00`;
+}
+
+// Item Kode helper generator
+function getItemKode(doc, itemIdx) {
+  const katCode = store.kategoriList.find(k => k.id === doc.kategoriId)?.kode || 'ATK';
+  return `${katCode}${String(doc.id * 10 + itemIdx + 1).padStart(4, '0')}`;
 }
 
 function toggleSort(field) {
@@ -495,53 +494,68 @@ function toggleSort(field) {
   }
 }
 
-// Filter and Sort Pipeline
+// Filtered and sorted data
 const filteredData = computed(() => {
   let list = [...store.barangMasukList];
 
-  // 1. Search (asal barang atau sub kategori)
+  // Search filter
   if (filters.search.trim()) {
     const q = filters.search.trim().toLowerCase();
     list = list.filter(item => {
-      const matchAsal = item.asalBarang?.toLowerCase().includes(q);
-      const matchSub = item.subKategoriNama?.toLowerCase().includes(q);
-      const matchSurat = item.nomorSurat?.toLowerCase().includes(q);
-      return matchAsal || matchSub || matchSurat;
+      const matchDoc = (
+        item.asalBarang?.toLowerCase().includes(q) ||
+        item.subKategoriNama?.toLowerCase().includes(q) ||
+        item.operatorNama?.toLowerCase().includes(q) ||
+        item.nomorSurat?.toLowerCase().includes(q)
+      );
+      const matchItem = item.items?.some(it =>
+        it.namaBarang?.toLowerCase().includes(q) ||
+        it.kode?.toLowerCase().includes(q)
+      );
+      return matchDoc || matchItem;
     });
   }
 
-  // 2. Filter Kategori
+  // Kategori filter
   if (filters.kategoriId) {
     list = list.filter(item => item.kategoriId === Number(filters.kategoriId));
   }
 
-  // 3. Filter Sub Kategori
+  // Sub Kategori filter
   if (filters.subKategoriId) {
     list = list.filter(item => item.subKategoriId === Number(filters.subKategoriId));
   }
 
-  // 4. Filter Tahun
+  // Tahun filter
   if (filters.tahun) {
-    list = list.filter(item => item.tahun === filters.tahun || item.tanggal?.startsWith(filters.tahun));
+    list = list.filter(item => item.tahun === String(filters.tahun));
   }
 
-  // 5. Sorting (tanggal, asalBarang, totalHarga)
+  // Sorting
   list.sort((a, b) => {
-    let comp = 0;
+    let valA = a[sortBy.value];
+    let valB = b[sortBy.value];
+
     if (sortBy.value === 'tanggal') {
-      comp = new Date(a.tanggal) - new Date(b.tanggal);
-    } else if (sortBy.value === 'asalBarang') {
-      comp = (a.asalBarang || '').localeCompare(b.asalBarang || '');
+      valA = new Date(valA).getTime();
+      valB = new Date(valB).getTime();
     } else if (sortBy.value === 'totalHarga') {
-      comp = (a.totalHarga || 0) - (b.totalHarga || 0);
+      valA = Number(valA);
+      valB = Number(valB);
+    } else if (typeof valA === 'string') {
+      valA = valA.toLowerCase();
+      valB = valB.toLowerCase();
     }
-    return sortDir.value === 'asc' ? comp : -comp;
+
+    if (valA < valB) return sortDir.value === 'asc' ? -1 : 1;
+    if (valA > valB) return sortDir.value === 'asc' ? 1 : -1;
+    return 0;
   });
 
   return list;
 });
 
-// Paging calculations
+// Pagination calculation
 const totalPages = computed(() => Math.ceil(filteredData.value.length / pageSize) || 1);
 const startIndex = computed(() => (currentPage.value - 1) * pageSize);
 const endIndex = computed(() => startIndex.value + pageSize);
@@ -549,14 +563,21 @@ const paginatedData = computed(() => filteredData.value.slice(startIndex.value, 
 
 // Export Excel handler
 function handleExportExcel() {
-  exportBarangMasukToExcel(filteredData.value, filters);
-  store.showToast(`Berhasil mengekspor ${filteredData.value.length} baris data ke Excel!`, 'success');
+  exportBarangMasukToExcel(filteredData.value, {
+    search: filters.search,
+    kategori: store.kategoriList.find(k => k.id === Number(filters.kategoriId))?.nama,
+    subKategori: availableSubKategori.value.find(s => s.id === Number(filters.subKategoriId))?.nama,
+    tahun: filters.tahun
+  });
+  store.showToast('Data berhasil diekspor ke file Excel (.xlsx)', 'success');
 }
 
-// Modal handlers
+// Modal handling
 const showPrintModal = ref(false);
 const showDetailModal = ref(false);
+const showDeleteModal = ref(false);
 const selectedItem = ref(null);
+const itemToDelete = ref(null);
 
 function openPrintModal(item) {
   selectedItem.value = item;
@@ -568,10 +589,6 @@ function openDetailModal(item) {
   showDetailModal.value = true;
 }
 
-// Delete handlers
-const showDeleteModal = ref(false);
-const itemToDelete = ref(null);
-
 function confirmDelete(item) {
   itemToDelete.value = item;
   showDeleteModal.value = true;
@@ -582,9 +599,45 @@ function executeDelete() {
     store.deleteBarangMasuk(itemToDelete.value.id);
     showDeleteModal.value = false;
     itemToDelete.value = null;
-    if (paginatedData.value.length === 0 && currentPage.value > 1) {
-      currentPage.value--;
-    }
+    store.showToast('Data barang masuk berhasil dihapus', 'success');
   }
 }
 </script>
+
+<style scoped>
+.hover-primary:hover {
+  color: #216ac4 !important;
+}
+
+.custom-dashboard-table {
+  border-collapse: collapse !important;
+  width: 100%;
+}
+
+.custom-dashboard-table thead tr th {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.custom-dashboard-table th,
+.custom-dashboard-table td {
+  padding: 0.75rem 0.85rem;
+}
+
+.custom-dashboard-table .doc-start-row td {
+  border-top: 1px solid #e2e8f0;
+}
+
+.custom-dashboard-table .doc-sub-row td.item-cell {
+  border-top: 1px solid #f1f5f9;
+}
+
+.custom-dashboard-table td.rowspan-cell {
+  background-color: #ffffff;
+  border-right: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+</style>
