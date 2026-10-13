@@ -119,7 +119,7 @@
                 </tr>
                 <tr>
                   <td colspan="7" class="small text-secondary">
-                    <em>Terbilang: Lima Puluh Empat Juta Empat Ratus Ribu Rupiah (Plafon Sub Kategori: {{ formatRupiah(item.batasHargaSubKategori) }})</em>
+                    <em>Terbilang: {{ angkaKeTerbilang(item.totalHarga) }} (Plafon Sub Kategori: {{ formatRupiah(item.batasHargaSubKategori) }})</em>
                   </td>
                 </tr>
               </tfoot>
@@ -168,6 +168,24 @@ const props = defineProps({
 });
 
 defineEmits(['close']);
+
+function angkaKeTerbilang(nilai) {
+  const satuan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+  function konversi(n) {
+    if (n < 12) return satuan[n];
+    if (n < 20) return konversi(n - 10) + ' Belas';
+    if (n < 100) return konversi(Math.floor(n / 10)) + ' Puluh ' + konversi(n % 10);
+    if (n < 200) return 'Seratus ' + konversi(n - 100);
+    if (n < 1000) return konversi(Math.floor(n / 100)) + ' Ratus ' + konversi(n % 100);
+    if (n < 2000) return 'Seribu ' + konversi(n - 1000);
+    if (n < 1000000) return konversi(Math.floor(n / 1000)) + ' Ribu ' + konversi(n % 1000);
+    if (n < 1000000000) return konversi(Math.floor(n / 1000000)) + ' Juta ' + konversi(n % 1000000);
+    if (n < 1000000000000) return konversi(Math.floor(n / 1000000000)) + ' Milyar ' + konversi(n % 1000000000);
+    return '';
+  }
+  if (!nilai || nilai === 0) return 'Nol Rupiah';
+  return (konversi(Math.floor(Math.abs(nilai))).replace(/\s+/g, ' ').trim() + ' Rupiah');
+}
 
 function formatDateFormal(dateStr) {
   if (!dateStr) return '-';

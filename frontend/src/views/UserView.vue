@@ -356,9 +356,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { store } from '../store/mockStore';
 import ConfirmModal from '../components/ConfirmModal.vue';
+
+onMounted(() => {
+  store.loadAllData();
+});
 
 const searchQuery = ref('');
 const roleFilter = ref('');
@@ -409,14 +413,16 @@ const startIndex = computed(() => (currentPage.value - 1) * pageSize);
 const endIndex = computed(() => startIndex.value + pageSize);
 const paginatedList = computed(() => filteredList.value.slice(startIndex.value, endIndex.value));
 
-function toggleLockUser(user) {
+async function toggleLockUser(user) {
   if (user.id === store.currentUser?.id) {
     store.showToast('Anda tidak dapat mengunci akun Anda sendiri yang sedang aktif!', 'error');
     return;
   }
-  store.toggleLockUser(user.id);
-  const statusMsg = user.isLocked ? 'dibuka kuncinya (Unlocked)' : 'dikunci (Locked)';
-  store.showToast(`Akun ${user.username} berhasil ${statusMsg}.`, 'info');
+  try {
+    await store.toggleLockUser(user.id);
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function openAddModal() {
@@ -443,7 +449,7 @@ function openEditModal(item) {
   showModal.value = true;
 }
 
-function saveUser() {
+async function saveUser() {
   modalError.value = '';
 
   const nama = form.nama.trim();
@@ -498,16 +504,17 @@ function saveUser() {
     payload.password = form.password;
   }
 
-  if (isEditing.value) {
-    store.updateUser(editingId.value, payload);
-    store.showToast('Pengguna berhasil diperbarui', 'success');
-  } else {
-    payload.password = form.password;
-    store.addUser(payload);
-    store.showToast('Pengguna baru berhasil ditambahkan', 'success');
+  try {
+    if (isEditing.value) {
+      await store.updateUser(editingId.value, payload);
+    } else {
+      payload.password = form.password;
+      await store.addUser(payload);
+    }
+    showModal.value = false;
+  } catch (err) {
+    modalError.value = err.message || 'Gagal menyimpan data pengguna';
   }
-
-  showModal.value = false;
 }
 
 function confirmDelete(item) {
@@ -515,12 +522,15 @@ function confirmDelete(item) {
   showDeleteModal.value = true;
 }
 
-function executeDelete() {
+async function executeDelete() {
   if (itemToDelete.value) {
-    store.deleteUser(itemToDelete.value.id);
-    showDeleteModal.value = false;
-    itemToDelete.value = null;
-    store.showToast('Pengguna berhasil dihapus', 'success');
+    try {
+      await store.deleteUser(itemToDelete.value.id);
+      showDeleteModal.value = false;
+      itemToDelete.value = null;
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
 </script>

@@ -417,12 +417,16 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, onMounted } from 'vue';
 import { store } from '../store/mockStore';
 import { exportBarangMasukToExcel } from '../utils/exportExcel';
 import PrintLetterModal from '../components/PrintLetterModal.vue';
 import DetailBarangModal from '../components/DetailBarangModal.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
+
+onMounted(() => {
+  store.loadAllData();
+});
 
 // Filters state
 const filters = reactive({
@@ -562,14 +566,26 @@ const endIndex = computed(() => startIndex.value + pageSize);
 const paginatedData = computed(() => filteredData.value.slice(startIndex.value, endIndex.value));
 
 // Export Excel handler
-function handleExportExcel() {
-  exportBarangMasukToExcel(filteredData.value, {
-    search: filters.search,
-    kategori: store.kategoriList.find(k => k.id === Number(filters.kategoriId))?.nama,
-    subKategori: availableSubKategori.value.find(s => s.id === Number(filters.subKategoriId))?.nama,
-    tahun: filters.tahun
-  });
-  store.showToast('Data berhasil diekspor ke file Excel (.xlsx)', 'success');
+async function handleExportExcel() {
+  try {
+    await store.exportExcel({
+      search: filters.search,
+      kategoriId: filters.kategoriId,
+      subKategoriId: filters.subKategoriId,
+      tahun: filters.tahun,
+      sort: sortBy.value,
+      order: sortDir.value
+    });
+  } catch (err) {
+    // Fallback export jika server offline
+    exportBarangMasukToExcel(filteredData.value, {
+      search: filters.search,
+      kategori: store.kategoriList.find(k => k.id === Number(filters.kategoriId))?.nama,
+      subKategori: availableSubKategori.value.find(s => s.id === Number(filters.subKategoriId))?.nama,
+      tahun: filters.tahun
+    });
+    store.showToast('Data berhasil diekspor ke file Excel (.xlsx)', 'success');
+  }
 }
 
 // Modal handling
@@ -594,12 +610,15 @@ function confirmDelete(item) {
   showDeleteModal.value = true;
 }
 
-function executeDelete() {
+async function executeDelete() {
   if (itemToDelete.value) {
-    store.deleteBarangMasuk(itemToDelete.value.id);
-    showDeleteModal.value = false;
-    itemToDelete.value = null;
-    store.showToast('Data barang masuk berhasil dihapus', 'success');
+    try {
+      await store.deleteBarangMasuk(itemToDelete.value.id);
+      showDeleteModal.value = false;
+      itemToDelete.value = null;
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
 </script>

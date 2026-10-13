@@ -284,6 +284,7 @@
 import { reactive, computed, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { store } from '../store/mockStore';
+import api from '../services/api';
 import { formatRupiah } from '../utils/formatters';
 
 const route = useRoute();
@@ -381,17 +382,31 @@ function removeItemRow(idx) {
   }
 }
 
+const selectedFile = ref(null);
+
 function handleFileUpload(e) {
   const file = e.target.files[0];
   if (file) {
     form.lampiranName = file.name;
+    selectedFile.value = file;
   }
 }
 
 // Prefill if edit mode
-onMounted(() => {
+onMounted(async () => {
   if (isEditMode.value) {
-    const existing = store.barangMasukList.find(b => b.id === Number(route.params.id));
+    let existing = store.barangMasukList.find(b => b.id === Number(route.params.id));
+    if (!existing) {
+      try {
+        const res = await api.barangMasuk.getById(Number(route.params.id));
+        if (res.success && res.data) {
+          existing = res.data;
+        }
+      } catch (e) {
+        console.warn('Gagal memuat barang masuk by ID:', e);
+      }
+    }
+
     if (existing) {
       form.operatorId = existing.operatorId;
       form.tanggal = existing.tanggal;
@@ -422,7 +437,7 @@ function formatNumberOnly(val) {
   return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   if (!form.kategoriId) {
     store.showToast('Kategori wajib dipilih!', 'error');
     return;
@@ -492,15 +507,16 @@ function handleSubmit() {
     totalHarga: totalKeseluruhan.value
   };
 
-  if (isEditMode.value) {
-    store.updateBarangMasuk(Number(route.params.id), payload);
-    store.showToast('Data barang masuk berhasil diperbarui!', 'success');
-  } else {
-    store.addBarangMasuk(payload);
-    store.showToast('Data barang masuk berhasil disimpan!', 'success');
+  try {
+    if (isEditMode.value) {
+      await store.updateBarangMasuk(Number(route.params.id), payload, selectedFile.value);
+    } else {
+      await store.addBarangMasuk(payload, selectedFile.value);
+    }
+    router.push('/barang-masuk');
+  } catch (err) {
+    console.error('Gagal menyimpan barang masuk:', err);
   }
-
-  router.push('/barang-masuk');
 }
 </script>
 

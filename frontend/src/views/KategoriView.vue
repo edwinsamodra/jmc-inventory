@@ -235,9 +235,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { store } from '../store/mockStore';
 import ConfirmModal from '../components/ConfirmModal.vue';
+
+onMounted(() => {
+  store.loadAllData();
+});
 
 const searchQuery = ref('');
 const currentPage = ref(1);
@@ -288,7 +292,7 @@ function openEditModal(item) {
   showModal.value = true;
 }
 
-function saveKategori() {
+async function saveKategori() {
   modalError.value = '';
   const trimmedKode = form.kode.trim().toUpperCase();
   const trimmedNama = form.nama.trim();
@@ -309,15 +313,16 @@ function saveKategori() {
     return;
   }
 
-  if (isEditing.value) {
-    store.updateKategori(editingId.value, { kode: trimmedKode, nama: trimmedNama });
-    store.showToast('Kategori berhasil diperbarui', 'success');
-  } else {
-    store.addKategori({ kode: trimmedKode, nama: trimmedNama });
-    store.showToast('Kategori baru berhasil ditambahkan', 'success');
+  try {
+    if (isEditing.value) {
+      await store.updateKategori(editingId.value, { kode: trimmedKode, nama: trimmedNama });
+    } else {
+      await store.addKategori({ kode: trimmedKode, nama: trimmedNama });
+    }
+    showModal.value = false;
+  } catch (err) {
+    modalError.value = err.message || 'Gagal menyimpan kategori';
   }
-
-  showModal.value = false;
 }
 
 function confirmDelete(item) {
@@ -325,12 +330,15 @@ function confirmDelete(item) {
   showDeleteModal.value = true;
 }
 
-function executeDelete() {
+async function executeDelete() {
   if (itemToDelete.value) {
-    store.deleteKategori(itemToDelete.value.id);
-    showDeleteModal.value = false;
-    itemToDelete.value = null;
-    store.showToast('Kategori berhasil dihapus', 'success');
+    try {
+      await store.deleteKategori(itemToDelete.value.id);
+      showDeleteModal.value = false;
+      itemToDelete.value = null;
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
 </script>

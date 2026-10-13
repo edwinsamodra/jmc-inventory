@@ -274,9 +274,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { store } from '../store/mockStore';
 import ConfirmModal from '../components/ConfirmModal.vue';
+
+onMounted(() => {
+  store.loadAllData();
+});
 
 const searchQuery = ref('');
 const kategoriFilter = ref('');
@@ -360,7 +364,7 @@ function openEditModal(item) {
   showModal.value = true;
 }
 
-function saveSubKategori() {
+async function saveSubKategori() {
   modalError.value = '';
   const trimmedNama = form.nama.trim();
 
@@ -377,23 +381,24 @@ function saveSubKategori() {
     return;
   }
 
-  if (isEditing.value) {
-    store.updateSubKategori(editingId.value, {
-      kategoriId: Number(form.kategoriId),
-      nama: trimmedNama,
-      batasHarga: Number(form.batasHarga)
-    });
-    store.showToast('Sub kategori berhasil diperbarui', 'success');
-  } else {
-    store.addSubKategori({
-      kategoriId: Number(form.kategoriId),
-      nama: trimmedNama,
-      batasHarga: Number(form.batasHarga)
-    });
-    store.showToast('Sub kategori baru berhasil ditambahkan', 'success');
+  try {
+    if (isEditing.value) {
+      await store.updateSubKategori(editingId.value, {
+        kategoriId: Number(form.kategoriId),
+        nama: trimmedNama,
+        batasHarga: Number(form.batasHarga)
+      });
+    } else {
+      await store.addSubKategori({
+        kategoriId: Number(form.kategoriId),
+        nama: trimmedNama,
+        batasHarga: Number(form.batasHarga)
+      });
+    }
+    showModal.value = false;
+  } catch (err) {
+    modalError.value = err.message || 'Gagal menyimpan sub kategori';
   }
-
-  showModal.value = false;
 }
 
 function confirmDelete(item) {
@@ -401,12 +406,15 @@ function confirmDelete(item) {
   showDeleteModal.value = true;
 }
 
-function executeDelete() {
+async function executeDelete() {
   if (itemToDelete.value) {
-    store.deleteSubKategori(itemToDelete.value.id);
-    showDeleteModal.value = false;
-    itemToDelete.value = null;
-    store.showToast('Sub kategori berhasil dihapus', 'success');
+    try {
+      await store.deleteSubKategori(itemToDelete.value.id);
+      showDeleteModal.value = false;
+      itemToDelete.value = null;
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
 </script>

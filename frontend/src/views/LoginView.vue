@@ -262,20 +262,23 @@ function quickFill(u, p) {
   errorMessage.value = '';
 }
 
-function handleLogin() {
+async function handleLogin() {
   errorMessage.value = '';
   loading.value = true;
 
-  setTimeout(() => {
-    const res = store.login(form.username, form.password);
-    loading.value = false;
+  try {
+    const res = await store.login(form.username, form.password);
     if (res.success) {
       store.showToast(`Selamat datang, ${res.user.nama}!`, 'success');
       router.push('/barang-masuk');
     } else {
       errorMessage.value = res.message;
     }
-  }, 350);
+  } catch (err) {
+    errorMessage.value = err.message || 'Gagal masuk ke sistem';
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 

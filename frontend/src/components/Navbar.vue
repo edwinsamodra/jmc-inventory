@@ -136,9 +136,9 @@ const toggleUserDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
 
-const handleLogout = () => {
+const handleLogout = async () => {
   isDropdownOpen.value = false;
-  store.logout();
+  await store.logout();
   router.push('/login');
 };
 

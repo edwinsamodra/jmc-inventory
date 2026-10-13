@@ -48,13 +48,13 @@
                 </div>
                 <div class="col-12" v-if="item.lampiranName">
                   <div class="text-secondary small">File Lampiran:</div>
-                  <div class="text-primary fw-medium small">
+                  <a :href="`/api/barang-masuk/${item.id}/lampiran`" target="_blank" download class="text-primary text-decoration-none fw-medium small d-inline-flex align-items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm me-1" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                       <path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l4 -4" />
                     </svg>
-                    {{ item.lampiranName }}
-                  </div>
+                    {{ item.lampiranName }} (Unduh Lampiran)
+                  </a>
                 </div>
               </div>
             </div>
