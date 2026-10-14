@@ -5,14 +5,17 @@
 
 const API_BASE_URL = '/api';
 
+const TOKEN_KEY = 'jmc_jwt_token';
+
 const getToken = () => {
-  return localStorage.getItem('arrg_jwt_token') || '';
+  return localStorage.getItem(TOKEN_KEY) || localStorage.getItem('arrg_jwt_token') || '';
 };
 
 export const setToken = (token) => {
   if (token) {
-    localStorage.setItem('arrg_jwt_token', token);
+    localStorage.setItem(TOKEN_KEY, token);
   } else {
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem('arrg_jwt_token');
   }
 };

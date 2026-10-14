@@ -143,14 +143,6 @@
                 <span class="nav-link-title">Manajemen User</span>
               </RouterLink>
             </li>
-
-            <!-- OPERATOR NOTICE IF OPERATOR -->
-            <li v-if="!isAdmin" class="nav-item mt-3">
-              <div class="p-2 rounded bg-dark border border-secondary text-secondary small">
-                <div class="fw-bold text-warning mb-1">Peran: Operator</div>
-                <div>Akses terbatas pada input dan verifikasi data Barang Masuk.</div>
-              </div>
-            </li>
           </ul>
         </div>
       </div>
@@ -159,10 +151,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRoute, RouterLink } from 'vue-router';
-import { store } from '../store/mockStore';
+import { computed, ref } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
 import logoJmc from '../assets/images/logo/logo_jmc.png';
+import { store } from '../store/mockStore';
 
 const route = useRoute();
 const masterOpen = ref(true);

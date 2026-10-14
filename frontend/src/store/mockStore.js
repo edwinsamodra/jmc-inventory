@@ -1,14 +1,14 @@
 import { reactive } from 'vue';
 import api, { setToken } from '../services/api';
 
-const TOKEN_KEY = 'arrg_jwt_token';
-const USER_KEY = 'arrg_current_user';
+const TOKEN_KEY = 'jmc_jwt_token';
+const USER_KEY = 'jmc_current_user';
 
 function getSavedUser() {
   try {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = localStorage.getItem(TOKEN_KEY) || localStorage.getItem('arrg_jwt_token');
     if (!token) return null;
-    const raw = localStorage.getItem(USER_KEY);
+    const raw = localStorage.getItem(USER_KEY) || localStorage.getItem('arrg_current_user');
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
     return null;
