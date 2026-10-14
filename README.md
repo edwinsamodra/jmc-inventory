@@ -37,7 +37,7 @@ Seluruh service (Frontend, Backend, dan Database) dapat langsung dijalankan bers
 
 - **Node.js**: `node:24-alpine` (digunakan pada backend service & proses build frontend)
 - **MariaDB**: `mariadb:12.3`
-- **Frontend Server**: Nginx Alpine (Reverse proxy port `8080` -> internal backend port `3000`)
+- **Frontend Server**: Nginx Alpine (Reverse proxy port `80` -> internal backend port `3000`)
 
 ```bash
 # 1. Jalankan semua container (Frontend, Backend, MariaDB)
@@ -47,10 +47,10 @@ docker compose up -d --build
 docker compose ps
 ```
 
-Akses layanan di dev mode:
-- **Frontend App**: [http://localhost:8080](http://localhost:8080) (atau http://localhost:5173 jika dijalankan via npm dev lokal)
-- **Backend API**: [http://localhost:3000](http://localhost:3000) (Health check: `http://localhost:3000/api/health`)
-- **MariaDB Database**: `localhost:3306` (User: `jmc_user`, Database: `jmc_inventory`)
+Akses layanan via Docker Compose:
+- **Frontend App**: [http://localhost](http://localhost) (Port `80`, atau http://localhost:5173 jika dijalankan via Vite dev server lokal)
+- **API & Swagger Docs**: [http://localhost/api-docs](http://localhost/api-docs) (Direverse-proxy secara internal melalui Nginx)
+- **Keamanan Jaringan**: Port `3000` (Backend) dan `3306` (MariaDB) tidak diekspos ke publik/host, komunikasi antar-service (`DB -> BE -> FE`) sepenuhnya berjalan aman melalui jaringan internal Docker.
 
 ---
 
