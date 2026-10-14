@@ -20,7 +20,7 @@ User.init(
       allowNull: false,
       unique: true,
       validate: {
-        len: [3, 100]
+        len: [8, 100]
       }
     },
     password: {
@@ -31,14 +31,15 @@ User.init(
       type: DataTypes.STRING(100),
       allowNull: false,
       validate: {
-        len: [1, 100]
+        len: [8, 100]
       }
     },
     email: {
       type: DataTypes.STRING(100),
       allowNull: false,
       validate: {
-        isEmail: true
+        isEmail: true,
+        len: [8, 100]
       }
     },
     isLocked: {
