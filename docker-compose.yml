@@ -8,6 +8,7 @@ services:
       MYSQL_DATABASE: jmc_inventory
       MYSQL_USER: jmc_user
       MYSQL_PASSWORD: jmc_password
+      TZ: Asia/Jakarta
 
     volumes:
       - mariadb_data:/var/lib/mysql
@@ -32,6 +33,7 @@ services:
       DB_PASSWORD: jmc_password
       DB_NAME: jmc_inventory
       JWT_SECRET: jmc_inventory_secret_key_123456
+      TZ: Asia/Jakarta
 
     depends_on:
       mariadb:

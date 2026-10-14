@@ -13,6 +13,7 @@ export const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   host: dbHost,
   port: dbPort,
   dialect: 'mariadb',
+  timezone: '+07:00', // Asia/Jakarta (WIB)
   dialectOptions: {
     // MariaDB connection options for high performance & safe decimals
     connectTimeout: 10000,

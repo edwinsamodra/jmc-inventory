@@ -11,6 +11,9 @@ import { errorHandler, notFoundHandler } from './middlewares/errorMiddleware.js'
 
 dotenv.config();
 
+// Pastikan zona waktu disetel ke Asia/Jakarta (WIB)
+process.env.TZ = 'Asia/Jakarta';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
