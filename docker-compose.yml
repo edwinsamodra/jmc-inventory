@@ -1,13 +1,13 @@
 services:
   mariadb:
     image: mariadb:12.3
-    container_name: arrg_mariadb
+    container_name: jmc_mariadb
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: arrg_inventory
-      MYSQL_USER: arrg_user
-      MYSQL_PASSWORD: arrg_password
+      MYSQL_DATABASE: jmc_inventory
+      MYSQL_USER: jmc_user
+      MYSQL_PASSWORD: jmc_password
     ports:
       - "3306:3306"
     volumes:
@@ -22,16 +22,16 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: arrg_backend
+    container_name: jmc_backend
     restart: always
     environment:
       PORT: 3000
       DB_HOST: mariadb
       DB_PORT: 3306
-      DB_USER: arrg_user
-      DB_PASSWORD: arrg_password
-      DB_NAME: arrg_inventory
-      JWT_SECRET: arrg_secret_key_123456
+      DB_USER: jmc_user
+      DB_PASSWORD: jmc_password
+      DB_NAME: jmc_inventory
+      JWT_SECRET: jmc_inventory_secret_key_123456
     ports:
       - "3000:3000"
     depends_on:
@@ -42,7 +42,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: arrg_frontend
+    container_name: jmc_frontend
     restart: always
     ports:
       - "8080:80"

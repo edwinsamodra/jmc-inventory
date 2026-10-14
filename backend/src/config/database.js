@@ -7,7 +7,7 @@ const dbHost = process.env.DB_HOST || 'localhost';
 const dbPort = parseInt(process.env.DB_PORT || '3306', 10);
 const dbUser = process.env.DB_USER || 'admin';
 const dbPassword = process.env.DB_PASSWORD || 'admin';
-const dbName = process.env.DB_NAME || 'arrg_inventory';
+const dbName = process.env.DB_NAME || 'jmc_inventory';
 
 export const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   host: dbHost,

@@ -1,7 +1,7 @@
 {
-  "name": "arrg-backend",
+  "name": "jmc-inventory-backend",
   "version": "1.0.0",
-  "description": "Backend API for Pengelolaan Barang (arrg)",
+  "description": "Backend API for JMC Inventory (Pengelolaan Barang)",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
