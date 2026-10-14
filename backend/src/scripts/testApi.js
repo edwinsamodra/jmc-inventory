@@ -87,23 +87,19 @@ async function runTests() {
     const wrongPassRes = await request({ path: '/api/auth/login', method: 'POST' }, { username: 'admin', password: 'WrongPassword' });
     assert(wrongPassRes.status === 401, 'Login salah password ditolak dengan HTTP 401');
 
-    // Akun terkunci (doni_lock)
-    const lockedRes = await request({ path: '/api/auth/login', method: 'POST' }, { username: 'doni_lock', password: 'Operator123' });
-    assert(lockedRes.status === 403 && lockedRes.body.message.includes('terkunci'), 'Login akun doni_lock ditolak dengan HTTP 403 (Locked)');
-
-    // Login Operator (budi_op)
-    const operatorLogin = await request({ path: '/api/auth/login', method: 'POST' }, { username: 'budi_op', password: 'Operator123' });
-    assert(operatorLogin.status === 200 && operatorLogin.body.data.token, 'Login operator budi_op berhasil mengembalikan JWT');
+    // Login Operator (operator)
+    const operatorLogin = await request({ path: '/api/auth/login', method: 'POST' }, { username: 'operator', password: 'Boleh@123' });
+    assert(operatorLogin.status === 200 && operatorLogin.body.data.token, 'Login operator berhasil mengembalikan JWT');
     const operatorToken = operatorLogin.body.data.token;
 
-    // Login Admin (admin)
-    const adminLogin = await request({ path: '/api/auth/login', method: 'POST' }, { username: 'admin', password: 'Password123' });
+    // Login Admin (administrator)
+    const adminLogin = await request({ path: '/api/auth/login', method: 'POST' }, { username: 'administrator', password: 'Boleh@123' });
     assert(adminLogin.status === 200 && adminLogin.body.data.user.role === 'Admin', 'Login super admin berhasil mengembalikan JWT');
     const adminToken = adminLogin.body.data.token;
 
     // GET /api/auth/me
     const meRes = await request({ path: '/api/auth/me', method: 'GET', headers: { Authorization: `Bearer ${adminToken}` } });
-    assert(meRes.status === 200 && meRes.body.data.username === 'admin', 'GET /api/auth/me berhasil mengembalikan profil admin');
+    assert(meRes.status === 200 && meRes.body.data.username === 'administrator', 'GET /api/auth/me berhasil mengembalikan profil admin');
 
     // ----------------------------------------------------
     // TEST 3: Otorisasi Berbasis Peran (RBAC)
@@ -182,14 +178,14 @@ async function runTests() {
     // Validasi Password Lemah (tidak ada angka / huruf besar)
     const weakUserRes = await request(
       { path: '/api/users', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
-      { role: 'Operator', username: 'usertest1', password: 'password', nama: 'User Test 1', email: 'test@arrg.local' }
+      { role: 'Operator', username: 'usertest1', password: 'password', nama: 'User Test 1', email: 'test@jmc.local' }
     );
     assert(weakUserRes.status === 422, 'Password tanpa huruf besar & angka ditolak HTTP 422');
 
     // Tambah User Valid
     const validUserRes = await request(
       { path: '/api/users', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
-      { role: 'Operator', username: 'usertest1', password: 'Password123', nama: 'User Test Satu', email: 'user.test1@arrg.local' }
+      { role: 'Operator', username: 'usertest1', password: 'Password123', nama: 'User Test Satu', email: 'user.test1@jmc.local' }
     );
     assert(validUserRes.status === 201 && validUserRes.body.data.username === 'usertest1', 'User baru dengan password valid berhasil dibuat');
     const createdUserId = validUserRes.body.data.id;
@@ -199,6 +195,13 @@ async function runTests() {
       { path: `/api/users/${createdUserId}/lock`, method: 'PATCH', headers: { Authorization: `Bearer ${adminToken}` } }
     );
     assert(lockToggleRes.status === 200 && lockToggleRes.body.data.isLocked === true, 'Admin berhasil mengunci akun pengguna (isLocked: true)');
+
+    // Login akun terkunci (isLocked)
+    const lockedLoginRes = await request(
+      { path: '/api/auth/login', method: 'POST' },
+      { username: 'usertest1', password: 'Password123' }
+    );
+    assert(lockedLoginRes.status === 403 && lockedLoginRes.body.message.includes('terkunci'), 'Login akun yang terkunci ditolak dengan HTTP 403 (Locked)');
 
     // Admin mencoba mengunci diri sendiri
     const lockSelfRes = await request(
