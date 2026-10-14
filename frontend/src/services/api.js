@@ -242,6 +242,12 @@ export const api = {
     async toggleVerifikasi(id) {
       return await request(`/barang-masuk/${id}/verifikasi`, { method: 'PATCH' });
     },
+    async toggleVerifikasiItem(itemId, docId = null) {
+      const url = docId
+        ? `/barang-masuk/${docId}/items/${itemId}/verifikasi`
+        : `/barang-masuk/items/${itemId}/verifikasi`;
+      return await request(url, { method: 'PATCH' });
+    },
     async getCetak(id) {
       return await request(`/barang-masuk/${id}/cetak`, { method: 'GET' });
     },

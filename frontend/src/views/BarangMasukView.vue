@@ -213,7 +213,7 @@
                   :rowspan="doc.items?.length || 1"
                   class="align-middle text-nowrap rowspan-cell"
                 >
-                  {{ formatDateTime(doc.tanggal) }}
+                  {{ formatDateTime(doc.tanggal, doc.createdAt) }}
                 </td>
 
                 <!-- ASAL BARANG -->
@@ -266,19 +266,20 @@
                   {{ doc.items && doc.items[0] ? formatNumberOnly(doc.items[0].total) : '-' }}
                 </td>
 
-                <!-- STATUS (Clickable toggle verification) -->
+                <!-- STATUS (Clickable toggle verification per item) -->
                 <td
                   class="text-center align-middle item-cell"
                   style="border-left: 1px solid #f1f5f9;"
                 >
                   <button
+                    v-if="doc.items && doc.items[0]"
                     type="button"
-                    @click="store.toggleVerifikasiBarangMasuk(doc.id)"
+                    @click="store.toggleVerifikasiItem(doc.id, doc.items[0].id)"
                     class="btn p-0 border-0 bg-transparent"
-                    :title="doc.isVerified ? 'Diverifikasi. Klik untuk membatalkan' : 'Belum diverifikasi. Klik untuk verifikasi'"
+                    :title="doc.items[0].isVerified ? 'Diverifikasi. Klik untuk membatalkan' : 'Belum diverifikasi. Klik untuk verifikasi'"
                   >
                     <!-- Green checkmark circle if verified -->
-                    <svg v-if="doc.isVerified" xmlns="http://www.w3.org/2000/svg" class="icon text-success" width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg v-if="doc.items[0].isVerified" xmlns="http://www.w3.org/2000/svg" class="icon text-success" width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                       <circle cx="12" cy="12" r="9" />
                       <path d="M9 12l2 2l4 -4" />
@@ -325,18 +326,18 @@
                     {{ formatNumberOnly(it.total) }}
                   </td>
 
-                  <!-- STATUS (Follows document status) -->
+                  <!-- STATUS (Per Item) -->
                   <td
                     class="text-center align-middle item-cell"
                     style="border-left: 1px solid #f1f5f9;"
                   >
                     <button
                       type="button"
-                      @click="store.toggleVerifikasiBarangMasuk(doc.id)"
+                      @click="store.toggleVerifikasiItem(doc.id, it.id)"
                       class="btn p-0 border-0 bg-transparent"
-                      :title="doc.isVerified ? 'Diverifikasi. Klik untuk membatalkan' : 'Belum diverifikasi. Klik untuk verifikasi'"
+                      :title="it.isVerified ? 'Diverifikasi. Klik untuk membatalkan' : 'Belum diverifikasi. Klik untuk verifikasi'"
                     >
-                      <svg v-if="doc.isVerified" xmlns="http://www.w3.org/2000/svg" class="icon text-success" width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <svg v-if="it.isVerified" xmlns="http://www.w3.org/2000/svg" class="icon text-success" width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                         <circle cx="12" cy="12" r="9" />
                         <path d="M9 12l2 2l4 -4" />
@@ -472,15 +473,36 @@ function formatNumberOnly(val) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
-// Format date to DD/MM/YY HH:mm:ss matching screenshot (e.g. 04/10/23 10:00:00)
-function formatDateTime(dateStr) {
-  if (!dateStr) return '-';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = String(d.getFullYear()).slice(-2);
-  return `${day}/${month}/${year} 10:00:00`;
+// Format date to DD/MM/YY HH:mm:ss in Asia/Jakarta timezone
+function formatDateTime(dateStr, createdAtStr = null) {
+  if (!dateStr && !createdAtStr) return '-';
+
+  const dateObj = new Date(dateStr || createdAtStr);
+  if (isNaN(dateObj.getTime())) return dateStr || '-';
+
+  // Jika dateStr tidak memiliki jam (hanya YYYY-MM-DD), gunakan createdAtStr untuk jam yang presisi
+  const hasTime = typeof dateStr === 'string' && (dateStr.includes('T') || dateStr.includes(':'));
+  const timeObj = (!hasTime && createdAtStr) ? new Date(createdAtStr) : dateObj;
+
+  const dateParts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Jakarta',
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(dateObj);
+
+  const timeParts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Jakarta',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).formatToParts(isNaN(timeObj.getTime()) ? dateObj : timeObj);
+
+  const d = Object.fromEntries(dateParts.map(p => [p.type, p.value]));
+  const t = Object.fromEntries(timeParts.map(p => [p.type, p.value]));
+
+  return `${d.day}/${d.month}/${d.year} ${t.hour}:${t.minute}:${t.second}`;
 }
 
 // Item Kode helper generator

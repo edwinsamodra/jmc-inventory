@@ -299,7 +299,7 @@ const operatorList = computed(() => {
 
 const form = reactive({
   operatorId: store.currentUser?.id || 1,
-  tanggal: new Date().toISOString().split('T')[0],
+  tanggal: new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }),
   kategoriId: '',
   subKategoriId: '',
   asalBarang: '',
@@ -480,10 +480,12 @@ async function handleSubmit() {
   const selectedKat = store.kategoriList.find(k => k.id === Number(form.kategoriId));
   const selectedSub = selectedSubKategori.value;
   const selectedOp = (store.userList || []).find(u => u.id === Number(form.operatorId)) || store.currentUser;
-  const yearStr = new Date(form.tanggal).getFullYear().toString();
+  const nowJakarta = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' });
+  const finalTanggal = isEditMode.value ? form.tanggal : nowJakarta;
+  const yearStr = new Date(finalTanggal).getFullYear().toString();
 
   const payload = {
-    tanggal: form.tanggal,
+    tanggal: finalTanggal,
     tahun: yearStr,
     nomorSurat: form.nomorSurat.trim(),
     asalBarang: form.asalBarang.trim(),

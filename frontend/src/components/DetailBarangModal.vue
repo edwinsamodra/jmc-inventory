@@ -73,6 +73,7 @@
                   <th>Satuan</th>
                   <th class="text-end">Total</th>
                   <th>Kadaluarsa</th>
+                  <th class="text-center" style="width: 140px;">Status Item</th>
                 </tr>
               </thead>
               <tbody>
@@ -84,13 +85,21 @@
                   <td>{{ it.satuan }}</td>
                   <td class="text-end fw-bold">{{ formatRupiah(it.total) }}</td>
                   <td class="small text-secondary">{{ it.expiredDate ? formatDateIndo(it.expiredDate) : '-' }}</td>
+                  <td class="text-center">
+                    <span
+                      class="badge"
+                      :class="it.isVerified ? 'bg-success text-white' : 'bg-secondary text-white'"
+                    >
+                      {{ it.isVerified ? 'Terverifikasi' : 'Belum Verifikasi' }}
+                    </span>
+                  </td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr class="table-light">
                   <td colspan="5" class="text-end fw-bold">Grand Total:</td>
                   <td class="text-end fw-bold fs-3 text-primary">{{ formatRupiah(item.totalHarga) }}</td>
-                  <td></td>
+                  <td colspan="2"></td>
                 </tr>
               </tfoot>
             </table>

@@ -372,11 +372,52 @@ export const store = reactive({
       const item = this.barangMasukList.find(b => b.id === id);
       if (item && res.data) {
         item.isVerified = res.data.isVerified;
+        if (Array.isArray(item.items)) {
+          item.items.forEach(it => {
+            it.isVerified = res.data.isVerified;
+          });
+        }
       }
       const verified = res.data?.isVerified;
       this.showToast(
         verified ? 'Status transaksi berhasil diverifikasi (centang hijau)!' : 'Verifikasi transaksi dibatalkan.',
         verified ? 'success' : 'info'
+      );
+      return res;
+    } catch (err) {
+      this.showToast(err.message, 'error');
+      throw err;
+    }
+  },
+
+  async toggleVerifikasiItem(docId, itemId) {
+    try {
+      const res = await api.barangMasuk.toggleVerifikasiItem(itemId, docId);
+      const doc = this.barangMasukList.find(b => b.id === docId);
+      let isItemVerified = false;
+
+      if (doc && Array.isArray(doc.items)) {
+        const item = doc.items.find(it => it.id === itemId);
+        if (item) {
+          if (res.data?.item && res.data.item.isVerified !== undefined) {
+            item.isVerified = res.data.item.isVerified;
+          } else if (res.data?.isVerified !== undefined) {
+            item.isVerified = res.data.isVerified;
+          } else {
+            item.isVerified = !item.isVerified;
+          }
+          isItemVerified = item.isVerified;
+        }
+
+        // Sinkronisasi status parent apakah seluruh item telah terverifikasi
+        doc.isVerified = doc.items.length > 0 && doc.items.every(it => Boolean(it.isVerified));
+      }
+
+      this.showToast(
+        isItemVerified
+          ? 'Item barang berhasil diverifikasi (centang hijau)!'
+          : 'Verifikasi item barang dibatalkan.',
+        isItemVerified ? 'success' : 'info'
       );
       return res;
     } catch (err) {
