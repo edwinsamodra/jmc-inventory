@@ -5,17 +5,53 @@ import { runMigrationAndSeed } from './seed.js';
 const PORT = 3999;
 let server;
 
+function createMultipartFormData(fields, file = null) {
+  const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2);
+  const crlf = '\r\n';
+  const parts = [];
+
+  for (const [key, val] of Object.entries(fields)) {
+    const stringVal = typeof val === 'object' ? JSON.stringify(val) : String(val);
+    parts.push(
+      `--${boundary}${crlf}Content-Disposition: form-data; name="${key}"${crlf}${crlf}${stringVal}${crlf}`
+    );
+  }
+
+  if (file) {
+    parts.push(
+      `--${boundary}${crlf}Content-Disposition: form-data; name="${file.fieldname}"; filename="${file.filename}"${crlf}Content-Type: ${file.contentType || 'application/octet-stream'}${crlf}${crlf}`
+    );
+  }
+
+  const headerPart = Buffer.from(parts.join(''), 'utf-8');
+  const fileContent = file ? (Buffer.isBuffer(file.content) ? file.content : Buffer.from(file.content)) : Buffer.alloc(0);
+  const footerPart = Buffer.from(`${file ? crlf : ''}--${boundary}--${crlf}`, 'utf-8');
+
+  const body = Buffer.concat([headerPart, fileContent, footerPart]);
+
+  return {
+    contentType: `multipart/form-data; boundary=${boundary}`,
+    body
+  };
+}
+
 function request(options, postData = null) {
   return new Promise((resolve, reject) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    };
+
+    if (postData && Buffer.isBuffer(postData)) {
+      headers['Content-Length'] = postData.length;
+    }
+
     const req = http.request(
       {
         hostname: '127.0.0.1',
         port: PORT,
         ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers || {})
-        }
+        headers
       },
       (res) => {
         let body = '';
@@ -35,7 +71,9 @@ function request(options, postData = null) {
     req.on('error', reject);
 
     if (postData) {
-      if (typeof postData === 'string') {
+      if (Buffer.isBuffer(postData)) {
+        req.write(postData);
+      } else if (typeof postData === 'string') {
         req.write(postData);
       } else {
         req.write(JSON.stringify(postData));
@@ -87,6 +125,10 @@ async function runTests() {
     const wrongPassRes = await request({ path: '/api/auth/login', method: 'POST' }, { username: 'admin', password: 'WrongPassword' });
     assert(wrongPassRes.status === 401, 'Login salah password ditolak dengan HTTP 401');
 
+    // Login tanpa username/password (wajib diisi)
+    const emptyLoginRes = await request({ path: '/api/auth/login', method: 'POST' }, { username: '', password: '' });
+    assert(emptyLoginRes.status === 400, 'Login dengan username/password kosong ditolak HTTP 400 (Wajib diisi)');
+
     // Login Operator (operator)
     const operatorLogin = await request({ path: '/api/auth/login', method: 'POST' }, { username: 'operator', password: 'Boleh@123' });
     assert(operatorLogin.status === 200 && operatorLogin.body.data.token, 'Login operator berhasil mengembalikan JWT');
@@ -136,6 +178,20 @@ async function runTests() {
     );
     assert(duplicateKatRes.status === 409, 'Penambahan kode kategori duplikat ditolak HTTP 409');
 
+    // Validasi Kode Kategori > 10 karakter
+    const longKodeKat = await request(
+      { path: '/api/kategori', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { kode: 'KODELEBIH10CHAR', nama: 'Kategori Valid' }
+    );
+    assert(longKodeKat.status === 422, 'Kode Kategori > 10 karakter ditolak HTTP 422');
+
+    // Validasi Nama Kategori kosong
+    const emptyNamaKat = await request(
+      { path: '/api/kategori', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { kode: 'VALID', nama: '' }
+    );
+    assert(emptyNamaKat.status === 422, 'Nama Kategori kosong ditolak HTTP 422');
+
     // Hapus Kategori yang masih punya Sub Kategori (id 1: ATK) -> RESTRICT
     const deleteKatRestrict = await request(
       { path: '/api/kategori/1', method: 'DELETE', headers: { Authorization: `Bearer ${adminToken}` } }
@@ -158,6 +214,20 @@ async function runTests() {
     );
     assert(addSubKat.status === 201 && addSubKat.body.data.batasHarga === 2500000, 'Admin berhasil menambah Sub Kategori');
     const createdSubKatId = addSubKat.body.data.id;
+
+    // Validasi Batas Harga bernilai negatif
+    const negativeBatasHarga = await request(
+      { path: '/api/sub-kategori', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { kategoriId: 1, nama: 'Sub Kategori Negatif', batasHarga: -50000 }
+    );
+    assert(negativeBatasHarga.status === 422, 'Batas Harga bernilai negatif ditolak HTTP 422');
+
+    // Validasi Duplikasi Nama pada Kategori yang sama
+    const duplicateSubKat = await request(
+      { path: '/api/sub-kategori', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { kategoriId: 1, nama: 'Sub Kategori Uji', batasHarga: 1000000 }
+    );
+    assert(duplicateSubKat.status === 409, 'Penambahan Sub Kategori dengan nama duplikat pada kategori yang sama ditolak HTTP 409');
 
     // Hapus Sub Kategori yang sudah memiliki transaksi Barang Masuk (id 1) -> RESTRICT
     const delSubKatRestrict = await request(
@@ -189,6 +259,41 @@ async function runTests() {
     );
     assert(validUserRes.status === 201 && validUserRes.body.data.username === 'usertest1', 'User baru dengan password valid berhasil dibuat');
     const createdUserId = validUserRes.body.data.id;
+
+    // Validasi Username < 8 karakter (harus 8-100)
+    const shortUsernameRes = await request(
+      { path: '/api/users', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { role: 'Operator', username: 'user123', password: 'Password123', nama: 'Nama Pengguna Valid', email: 'user123@jmc.local' }
+    );
+    assert(shortUsernameRes.status === 422, 'Username < 8 karakter ditolak HTTP 422');
+
+    // Validasi Nama < 8 karakter (harus 8-100)
+    const shortNamaRes = await request(
+      { path: '/api/users', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { role: 'Operator', username: 'userpjg1', password: 'Password123', nama: 'Pendek', email: 'userpjg1@jmc.local' }
+    );
+    assert(shortNamaRes.status === 422, 'Nama < 8 karakter ditolak HTTP 422');
+
+    // Validasi Format Email tidak valid / panjang < 8
+    const invalidEmailRes = await request(
+      { path: '/api/users', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { role: 'Operator', username: 'userpjg2', password: 'Password123', nama: 'Nama Pengguna Valid', email: 'bukanemail' }
+    );
+    assert(invalidEmailRes.status === 422, 'Email berformat tidak valid ditolak HTTP 422');
+
+    // Validasi Duplikasi Username (409)
+    const duplicateUserRes = await request(
+      { path: '/api/users', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { role: 'Operator', username: 'usertest1', password: 'Password123', nama: 'User Duplikat Test', email: 'lain@jmc.local' }
+    );
+    assert(duplicateUserRes.status === 409, 'Username duplikat ditolak HTTP 409');
+
+    // Validasi Duplikasi Email (409)
+    const duplicateEmailRes = await request(
+      { path: '/api/users', method: 'POST', headers: { Authorization: `Bearer ${adminToken}` } },
+      { role: 'Operator', username: 'usertest2', password: 'Password123', nama: 'User Duplikat Email', email: 'user.test1@jmc.local' }
+    );
+    assert(duplicateEmailRes.status === 409, 'Email duplikat ditolak HTTP 409');
 
     // Toggle Lock User
     const lockToggleRes = await request(
@@ -233,6 +338,144 @@ async function runTests() {
       'Transaksi melebihi Batas Plafon Sub Kategori DITOLAK dengan pesan validasi yang jelas'
     );
 
+    // Validasi Barang Masuk tanpa baris item (items: [])
+    const emptyItemsRes = await request(
+      { path: '/api/barang-masuk', method: 'POST', headers: { Authorization: `Bearer ${operatorToken}` } },
+      {
+        nomorSurat: 'SRT/TEST/003',
+        tanggal: '2026-04-14',
+        asalBarang: 'PT Toko Kertas Nusantara',
+        kategoriId: 1,
+        subKategoriId: 1,
+        items: []
+      }
+    );
+    assert(emptyItemsRes.status === 422, 'Barang Masuk tanpa baris item ditolak HTTP 422');
+
+    // Validasi Item dengan Jumlah < 1 (0)
+    const zeroJumlahRes = await request(
+      { path: '/api/barang-masuk', method: 'POST', headers: { Authorization: `Bearer ${operatorToken}` } },
+      {
+        tanggal: '2026-04-14',
+        asalBarang: 'PT Toko Kertas Nusantara',
+        kategoriId: 1,
+        subKategoriId: 1,
+        items: [
+          { namaBarang: 'Kertas HVS', harga: 50000, jumlah: 0, satuan: 'Rim' }
+        ]
+      }
+    );
+    assert(zeroJumlahRes.status === 422, 'Item dengan jumlah barang < 1 ditolak HTTP 422');
+
+    // Validasi Item dengan Harga negatif (< 0)
+    const negativeHargaRes = await request(
+      { path: '/api/barang-masuk', method: 'POST', headers: { Authorization: `Bearer ${operatorToken}` } },
+      {
+        tanggal: '2026-04-14',
+        asalBarang: 'PT Toko Kertas Nusantara',
+        kategoriId: 1,
+        subKategoriId: 1,
+        items: [
+          { namaBarang: 'Kertas HVS', harga: -1000, jumlah: 1, satuan: 'Rim' }
+        ]
+      }
+    );
+    assert(negativeHargaRes.status === 422, 'Item dengan harga negatif ditolak HTTP 422');
+
+    // Validasi Asal Barang > 200 karakter
+    const longAsalRes = await request(
+      { path: '/api/barang-masuk', method: 'POST', headers: { Authorization: `Bearer ${operatorToken}` } },
+      {
+        tanggal: '2026-04-14',
+        asalBarang: 'A'.repeat(201),
+        kategoriId: 1,
+        subKategoriId: 1,
+        items: [
+          { namaBarang: 'Kertas HVS', harga: 50000, jumlah: 1, satuan: 'Rim' }
+        ]
+      }
+    );
+    assert(longAsalRes.status === 422, 'Asal Barang > 200 karakter ditolak HTTP 422');
+
+    // Validasi Sub Kategori tidak sesuai Kategori induk
+    const mismatchSubKatRes = await request(
+      { path: '/api/barang-masuk', method: 'POST', headers: { Authorization: `Bearer ${operatorToken}` } },
+      {
+        tanggal: '2026-04-14',
+        asalBarang: 'PT Toko Kertas Nusantara',
+        kategoriId: 1, // Kategori 1 (ATK)
+        subKategoriId: 3, // Sub Kategori 3 milik Kategori 2 (Elektronik)
+        items: [
+          { namaBarang: 'Kertas HVS', harga: 50000, jumlah: 1, satuan: 'Rim' }
+        ]
+      }
+    );
+    assert(mismatchSubKatRes.status === 422, 'Sub Kategori tidak sesuai Kategori induk ditolak HTTP 422');
+
+    // Validasi Upload Lampiran dengan format TIDAK SAH (.pdf)
+    const invalidUploadData = createMultipartFormData(
+      {
+        tanggal: '2026-04-14',
+        asalBarang: 'PT Toko Komputer',
+        kategoriId: 2,
+        subKategoriId: 3,
+        items: JSON.stringify([{ namaBarang: 'Mouse USB', harga: 100000, jumlah: 1, satuan: 'Pcs' }])
+      },
+      {
+        fieldname: 'lampiran',
+        filename: 'dokumen.pdf',
+        contentType: 'application/pdf',
+        content: Buffer.from('%PDF-1.4 dummy pdf content')
+      }
+    );
+    const invalidUploadRes = await request(
+      {
+        path: '/api/barang-masuk',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${operatorToken}`,
+          'Content-Type': invalidUploadData.contentType
+        }
+      },
+      invalidUploadData.body
+    );
+    assert(
+      invalidUploadRes.status === 422 && invalidUploadRes.body.message.includes('Hanya file dengan ekstensi .doc, .docx, atau .zip'),
+      'Upload file lampiran dengan format tidak diizinkan (.pdf) ditolak HTTP 422'
+    );
+
+    // Validasi Upload Lampiran dengan format SAH (.docx)
+    const validUploadData = createMultipartFormData(
+      {
+        tanggal: '2026-04-14',
+        asalBarang: 'PT Solusi Komputer',
+        kategoriId: 2,
+        subKategoriId: 3,
+        items: JSON.stringify([{ namaBarang: 'Keyboard USB', harga: 150000, jumlah: 1, satuan: 'Pcs' }])
+      },
+      {
+        fieldname: 'lampiran',
+        filename: 'surat_jalan.docx',
+        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        content: Buffer.from('dummy docx content')
+      }
+    );
+    const validUploadRes = await request(
+      {
+        path: '/api/barang-masuk',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${operatorToken}`,
+          'Content-Type': validUploadData.contentType
+        }
+      },
+      validUploadData.body
+    );
+    assert(
+      validUploadRes.status === 201 && validUploadRes.body.data.lampiranName.includes('.docx'),
+      'Upload file lampiran dengan ekstensi yang diizinkan (.docx) berhasil (HTTP 201)'
+    );
+
     // Simpan transaksi valid (Total 3.000.000 <= 5.000.000)
     const validBmRes = await request(
       { path: '/api/barang-masuk', method: 'POST', headers: { Authorization: `Bearer ${operatorToken}` } },
@@ -260,6 +503,16 @@ async function runTests() {
     assert(
       toggleVerifRes.status === 200 && toggleVerifRes.body.data.isVerified === true,
       'Toggle verifikasi transaksi berhasil mengubah status centang hijau (isVerified: true)'
+    );
+
+    // Toggle Verifikasi Per Item (Centang Hijau Per Item)
+    const firstItemId = validBmRes.body.data.items[0].id;
+    const toggleItemRes = await request(
+      { path: `/api/barang-masuk/${createdBmId}/items/${firstItemId}/verifikasi`, method: 'PATCH', headers: { Authorization: `Bearer ${operatorToken}` } }
+    );
+    assert(
+      toggleItemRes.status === 200 && toggleItemRes.body.data.item.isVerified === false,
+      'Toggle verifikasi status per item (barang_masuk_item) berhasil'
     );
 
     // Cetak Surat Masuk
