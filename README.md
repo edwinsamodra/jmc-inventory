@@ -4,15 +4,13 @@
 
 | Informasi | Keterangan / Link |
 | :--- | :--- |
-| **1. Link Deployment (Live App)** | [https://jmc-inventory-mgmt.pages.dev](https://jmc-inventory-mgmt.pages.dev) *(atau sesuaikan dengan URL deployment aktif Anda)* |
-| **2. Link Video Demo** | [https://youtu.be/your-demo-video-id](https://youtu.be/your-demo-video-id) *(atau link Google Drive / Loom / YouTube demo)* |
-| **3. Tech Stack** | **Frontend:** Vue.js 3 (Composition API), Vite<br>**Backend:** Node.js, Express.js (Layered Architecture - Controller, Service, Repository)<br>**Database:** MariaDB 12.3 |
+| **1. Link Deployment (Live App)** | [https://inventory.edwinlab.my.id/login](https://inventory.edwinlab.my.id/login) |
+| **2. Link Video Demo** | [Google Drive](https://drive.google.com/drive/folders/1-mrIe9adCWI_JVxiEYJqJYAsd9pBzjL3?usp=sharing) |
+| **3. Tech Stack** | **Frontend:** Vue.js 3 (Composition API)<br>**Backend:** Node.js, Express.js (Layered Architecture - Controller, Service, Repository)<br>**Database:** MariaDB 12.3 |
 
 ---
 
 ## Akun Pengujian (Kredensial)
-
-Aplikasi menggunakan autentikasi nyata berbasis JWT yang terhubung langsung ke database MariaDB. Gunakan kredensial pengguna hasil seed berikut untuk login ke sistem:
 
 | Peran (Role) | Username | Password | Nama | Email | Hak Akses & Keterangan |
 | :--- | :--- | :--- | :--- | :--- | :--- |
