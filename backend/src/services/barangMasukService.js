@@ -1,4 +1,4 @@
-import { sequelize } from '../models/index.js';
+import { sequelize, BarangMasukItem } from '../models/index.js';
 import barangMasukRepository from '../repositories/barangMasukRepository.js';
 import subKategoriRepository from '../repositories/subKategoriRepository.js';
 import kategoriRepository from '../repositories/kategoriRepository.js';
@@ -98,8 +98,20 @@ export class BarangMasukService {
       errors.push('Asal Barang wajib diisi, maksimal 200 karakter');
     }
 
-    // Validasi Tanggal & Tahun
-    const targetTanggal = tanggal || new Date().toISOString().slice(0, 10);
+    // Validasi Tanggal & Tahun dalam Timezone Asia/Jakarta (WIB)
+    let targetTanggal = tanggal;
+    if (!targetTanggal) {
+      targetTanggal = new Date();
+    } else if (typeof targetTanggal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(targetTanggal.trim())) {
+      const nowJakartaTime = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(new Date());
+      targetTanggal = `${targetTanggal.trim()} ${nowJakartaTime}`;
+    }
     const tahun = String(new Date(targetTanggal).getFullYear());
 
     // Validasi Nomor Surat (otomatis jika tidak diisi)
@@ -263,7 +275,17 @@ export class BarangMasukService {
       finalOperatorId = parseInt(operatorId, 10);
     }
 
-    const targetTanggal = tanggal || existing.tanggal;
+    let targetTanggal = tanggal || existing.tanggal;
+    if (tanggal && typeof tanggal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(tanggal.trim())) {
+      const nowJakartaTime = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(new Date());
+      targetTanggal = `${tanggal.trim()} ${nowJakartaTime}`;
+    }
     const tahun = String(new Date(targetTanggal).getFullYear());
 
     if (asalBarang && (asalBarang.trim() === '' || asalBarang.trim().length > 200)) {
@@ -395,6 +417,39 @@ export class BarangMasukService {
     const newStatus = !existing.isVerified;
     await barangMasukRepository.updateVerificationStatus(id, newStatus);
     return await barangMasukRepository.findById(id);
+  }
+
+  async toggleItemVerification(itemId, targetBarangMasukId = null) {
+    const item = await BarangMasukItem.findByPk(itemId);
+    if (!item) {
+      const error = new Error('Data item barang masuk tidak ditemukan');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (targetBarangMasukId && parseInt(targetBarangMasukId, 10) !== item.barangMasukId) {
+      const error = new Error('Item barang tidak cocok dengan dokumen Barang Masuk yang ditentukan');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const newStatus = !item.isVerified;
+    await barangMasukRepository.updateItemVerificationStatus(itemId, newStatus);
+
+    const updatedItem = await BarangMasukItem.findByPk(itemId);
+    const parentDoc = await barangMasukRepository.findById(item.barangMasukId);
+
+    return {
+      item: {
+        id: updatedItem.id,
+        barangMasukId: updatedItem.barangMasukId,
+        namaBarang: updatedItem.namaBarang,
+        isVerified: Boolean(updatedItem.isVerified)
+      },
+      barangMasukId: item.barangMasukId,
+      parentIsVerified: parentDoc ? parentDoc.isVerified : false,
+      isVerified: Boolean(updatedItem.isVerified)
+    };
   }
 
   async getCetakData(id) {

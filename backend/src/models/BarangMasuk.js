@@ -19,7 +19,7 @@ BarangMasuk.init(
       }
     },
     tanggal: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
       allowNull: false
     },
     tahun: {

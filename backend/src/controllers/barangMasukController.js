@@ -102,6 +102,19 @@ export class BarangMasukController {
     }
   }
 
+  async toggleItemVerification(req, res, next) {
+    try {
+      const { id, itemId } = req.params;
+      const result = await barangMasukService.toggleItemVerification(itemId, id);
+      const message = result.isVerified
+        ? 'Status item barang berhasil diverifikasi (Centang Hijau)'
+        : 'Status verifikasi item barang berhasil dibatalkan';
+      return successResponse(res, result, message, 200);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getCetak(req, res, next) {
     try {
       const { id } = req.params;

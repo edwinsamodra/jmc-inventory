@@ -59,6 +59,12 @@ BarangMasukItem.init(
       type: DataTypes.DATEONLY,
       allowNull: true,
       field: 'expired_date'
+    },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'is_verified'
     }
   },
   {

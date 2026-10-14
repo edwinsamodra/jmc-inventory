@@ -1172,6 +1172,55 @@ Menyimpan transaksi barang masuk baru dengan rincian multi-baris item barang.
         }
       }
     },
+    '/api/barang-masuk/{id}/items/{itemId}/verifikasi': {
+      patch: {
+        tags: ['Barang Masuk'],
+        summary: 'Toggle status verifikasi per item barang masuk',
+        description: 'Mengubah status verifikasi untuk baris item barang tertentu (`barang_masuk_items`) secara independen tanpa mempengaruhi item lainnya.',
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'ID Dokumen Barang Masuk',
+            schema: { type: 'integer' }
+          },
+          {
+            name: 'itemId',
+            in: 'path',
+            required: true,
+            description: 'ID Item Barang Masuk',
+            schema: { type: 'integer' }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Status verifikasi item berhasil diubah.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Status item barang berhasil diverifikasi (Centang Hijau)' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        item: { $ref: '#/components/schemas/BarangMasukItem' },
+                        barangMasukId: { type: 'integer', example: 1 },
+                        parentIsVerified: { type: 'boolean', example: false },
+                        isVerified: { type: 'boolean', example: true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     '/api/barang-masuk/{id}/cetak': {
       get: {
         tags: ['Barang Masuk'],
@@ -2022,7 +2071,8 @@ Mendaftarkan pengguna baru ke sistem (khusus Admin).
           jumlah: { type: 'integer', example: 40 },
           satuan: { type: 'string', example: 'Rim' },
           total: { type: 'number', example: 2200000 },
-          expiredDate: { type: 'string', format: 'date', nullable: true, example: '' }
+          expiredDate: { type: 'string', format: 'date', nullable: true, example: '' },
+          isVerified: { type: 'boolean', example: true }
         }
       },
       CreateBarangMasukItemInput: {

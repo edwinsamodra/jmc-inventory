@@ -23,7 +23,7 @@ export class BarangMasukRepository {
         {
           model: BarangMasukItem,
           as: 'items',
-          attributes: ['id', 'namaBarang', 'harga', 'jumlah', 'satuan', 'total', 'expiredDate']
+          attributes: ['id', 'namaBarang', 'harga', 'jumlah', 'satuan', 'total', 'expiredDate', 'isVerified']
         }
       ]
     });
@@ -96,7 +96,7 @@ export class BarangMasukRepository {
       {
         model: BarangMasukItem,
         as: 'items',
-        attributes: ['id', 'namaBarang', 'harga', 'jumlah', 'satuan', 'total', 'expiredDate']
+        attributes: ['id', 'namaBarang', 'harga', 'jumlah', 'satuan', 'total', 'expiredDate', 'isVerified']
       }
     ];
 
@@ -131,7 +131,8 @@ export class BarangMasukRepository {
         jumlah: parseInt(it.jumlah, 10),
         satuan: it.satuan,
         total: parseFloat(it.total || it.harga * it.jumlah),
-        expiredDate: it.expiredDate || null
+        expiredDate: it.expiredDate || null,
+        isVerified: Boolean(it.isVerified || false)
       }));
 
       await BarangMasukItem.bulkCreate(itemRecords, { transaction });
@@ -160,7 +161,8 @@ export class BarangMasukRepository {
         jumlah: parseInt(it.jumlah, 10),
         satuan: it.satuan,
         total: parseFloat(it.total || it.harga * it.jumlah),
-        expiredDate: it.expiredDate || null
+        expiredDate: it.expiredDate || null,
+        isVerified: Boolean(it.isVerified || false)
       }));
 
       await BarangMasukItem.bulkCreate(itemRecords, { transaction });
@@ -186,7 +188,31 @@ export class BarangMasukRepository {
   async updateVerificationStatus(id, isVerified) {
     const record = await BarangMasuk.findByPk(id);
     if (!record) return null;
-    return await record.update({ isVerified });
+    await record.update({ isVerified });
+    await BarangMasukItem.update(
+      { isVerified },
+      { where: { barangMasukId: id } }
+    );
+    return record;
+  }
+
+  async updateItemVerificationStatus(itemId, isVerified) {
+    const item = await BarangMasukItem.findByPk(itemId);
+    if (!item) return null;
+
+    await item.update({ isVerified });
+
+    // Periksa status verifikasi seluruh item dalam transaksi Barang Masuk yang sama
+    const allItems = await BarangMasukItem.findAll({
+      where: { barangMasukId: item.barangMasukId }
+    });
+    const allVerified = allItems.length > 0 && allItems.every(it => Boolean(it.isVerified));
+    await BarangMasuk.update(
+      { isVerified: allVerified },
+      { where: { id: item.barangMasukId } }
+    );
+
+    return item;
   }
 
   async generateNomorSurat(tanggal) {
@@ -229,7 +255,9 @@ export class BarangMasukRepository {
       operatorUsername: item.operator?.username || '',
       lampiranName: item.lampiranName || '',
       lampiranUrl: item.lampiranName ? `/api/barang-masuk/${item.id}/lampiran` : null,
-      isVerified: Boolean(item.isVerified),
+      isVerified: (item.items && item.items.length > 0)
+        ? item.items.every(it => Boolean(it.isVerified))
+        : Boolean(item.isVerified),
       totalHarga: parseFloat(item.totalHarga || 0),
       items: (item.items || []).map((it, idx) => ({
         id: it.id || `${item.id}-${idx + 1}`,
@@ -238,7 +266,8 @@ export class BarangMasukRepository {
         jumlah: parseInt(it.jumlah || 0, 10),
         satuan: it.satuan,
         total: parseFloat(it.total || 0),
-        expiredDate: it.expiredDate || null
+        expiredDate: it.expiredDate || null,
+        isVerified: Boolean(it.isVerified)
       })),
       createdAt: item.createdAt,
       updatedAt: item.updatedAt

@@ -20,7 +20,9 @@ router.get('/:id', barangMasukController.getById);
 router.put('/:id', handleSingleUpload('lampiran'), barangMasukController.update);
 router.delete('/:id', barangMasukController.delete);
 
-// 4. Aksi Tambahan: Toggle Verifikasi, Cetak Surat, Download Lampiran
+// 4. Aksi Tambahan: Toggle Verifikasi Item & Transaksi, Cetak Surat, Download Lampiran
+router.patch('/items/:itemId/verifikasi', barangMasukController.toggleItemVerification);
+router.patch('/:id/items/:itemId/verifikasi', barangMasukController.toggleItemVerification);
 router.patch('/:id/verifikasi', barangMasukController.toggleVerification);
 router.get('/:id/cetak', barangMasukController.getCetak);
 router.get('/:id/lampiran', barangMasukController.downloadLampiran);
