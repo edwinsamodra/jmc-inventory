@@ -16,7 +16,7 @@ API ini mengimplementasikan autentikasi JWT, validasi input berlapis (termasuk v
     `,
     contact: {
       name: 'Tim Pengembang Sistem JMC Inventory',
-      email: 'dev@arrg.local'
+      email: 'dev@jmcinventory.local'
     }
   },
   servers: [
@@ -88,7 +88,7 @@ API ini mengimplementasikan autentikasi JWT, validasi input berlapis (termasuk v
                       role: 'Admin',
                       username: 'admin',
                       nama: 'Super Administrator',
-                      email: 'admin@arrg.local',
+                      email: 'admin@jmcinventory.local',
                       isLocked: false
                     }
                   }
@@ -156,7 +156,7 @@ API ini mengimplementasikan autentikasi JWT, validasi input berlapis (termasuk v
                     role: 'Admin',
                     username: 'admin',
                     nama: 'Super Administrator',
-                    email: 'admin@arrg.local',
+                    email: 'admin@jmcinventory.local',
                     isLocked: false
                   }
                 }
@@ -1377,7 +1377,7 @@ Menyimpan transaksi barang masuk baru dengan rincian multi-baris item barang.
                       role: 'Admin',
                       username: 'admin',
                       nama: 'Super Administrator',
-                      email: 'admin@arrg.local',
+                      email: 'admin@jmcinventory.local',
                       isLocked: false
                     },
                     {
@@ -1385,7 +1385,7 @@ Menyimpan transaksi barang masuk baru dengan rincian multi-baris item barang.
                       role: 'Operator',
                       username: 'budi_op',
                       nama: 'Budi Santoso',
-                      email: 'budi.santoso@arrg.local',
+                      email: 'budi.santoso@jmcinventory.local',
                       isLocked: false
                     },
                     {
@@ -1393,7 +1393,7 @@ Menyimpan transaksi barang masuk baru dengan rincian multi-baris item barang.
                       role: 'Operator',
                       username: 'doni_lock',
                       nama: 'Doni Prasetyo (Locked Demo)',
-                      email: 'doni.prasetyo@arrg.local',
+                      email: 'doni.prasetyo@jmcinventory.local',
                       isLocked: true
                     }
                   ],
@@ -1433,7 +1433,7 @@ Mendaftarkan pengguna baru ke sistem (khusus Admin).
                 username: 'ahmad_fauzi',
                 password: 'Password123',
                 nama: 'Ahmad Fauzi Rahman',
-                email: 'ahmad.fauzi@arrg.local'
+                email: 'ahmad.fauzi@jmcinventory.local'
               }
             }
           }
@@ -1452,7 +1452,7 @@ Mendaftarkan pengguna baru ke sistem (khusus Admin).
                     role: 'Operator',
                     username: 'ahmad_fauzi',
                     nama: 'Ahmad Fauzi Rahman',
-                    email: 'ahmad.fauzi@arrg.local',
+                    email: 'ahmad.fauzi@jmcinventory.local',
                     isLocked: false
                   }
                 }
@@ -1542,7 +1542,7 @@ Mendaftarkan pengguna baru ke sistem (khusus Admin).
                 role: 'Operator',
                 username: 'budi_santoso',
                 nama: 'Budi Santoso, S.Kom',
-                email: 'budi.santoso@arrg.local',
+                email: 'budi.santoso@jmcinventory.local',
                 password: 'NewPassword123'
               }
             }
@@ -1773,7 +1773,7 @@ Mendaftarkan pengguna baru ke sistem (khusus Admin).
           role: { type: 'string', enum: ['Admin', 'Operator'], example: 'Admin' },
           username: { type: 'string', example: 'admin' },
           nama: { type: 'string', example: 'Super Administrator' },
-          email: { type: 'string', format: 'email', example: 'admin@arrg.local' },
+          email: { type: 'string', format: 'email', example: 'admin@jmcinventory.local' },
           isLocked: { type: 'boolean', example: false }
         }
       },
@@ -1814,7 +1814,7 @@ Mendaftarkan pengguna baru ke sistem (khusus Admin).
             minLength: 8,
             maxLength: 100,
             description: 'Email aktif pengguna',
-            example: 'ahmad.fauzi@arrg.local'
+            example: 'ahmad.fauzi@jmcinventory.local'
           }
         }
       },
@@ -1844,7 +1844,7 @@ Mendaftarkan pengguna baru ke sistem (khusus Admin).
             format: 'email',
             minLength: 8,
             maxLength: 100,
-            example: 'budi.santoso@arrg.local'
+            example: 'budi.santoso@jmcinventory.local'
           },
           password: {
             type: 'string',

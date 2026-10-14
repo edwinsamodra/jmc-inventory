@@ -12,14 +12,15 @@
 
 ## Akun Pengujian (Kredensial)
 
-Tersedia akun pengujian bawaan (tersedia juga tombol *Quick Fill* di halaman login):
+Aplikasi menggunakan autentikasi nyata berbasis JWT yang terhubung langsung ke database MariaDB. Gunakan kredensial pengguna hasil seed berikut untuk login ke sistem:
 
-| Peran (Role) | Username | Password | Hak Akses & Keterangan |
-| :--- | :--- | :--- | :--- |
-| **Super Administrator** | `admin` | `Password123` | Akses penuh ke seluruh menu: Login, Barang Masuk, Master Kategori, Master Sub Kategori, dan Manajemen User. |
-| **Operator** | `budi_op` | `Operator123` | Akses operasional: Login dan transaksi Barang Masuk (input, verifikasi, ekspor, cetak). |
-| **Operator 2** | `siti_op` | `Operator123` | Akun operator alternatif untuk pengujian multi-user. |
-| **Akun Terkunci (Locked Demo)** | `doni_lock` | `Operator123` | Akun uji coba untuk memverifikasi penolakan login pada user berstatus *Locked*. |
+| Peran (Role) | Username | Password | Nama | Email | Hak Akses & Keterangan |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Administrator (Admin)** | `administrator` | `Boleh@123` | Administrator | `admin@example.com` | Akses penuh: Transaksi Barang Masuk, Master Data Kategori, Master Sub Kategori, dan Manajemen Pengguna. |
+| **Operator** | `operator` | `Boleh@123` | Operator | `operator@example.com` | Akses operasional: Input, filter/pencarian, toggle verifikasi, cetak surat masuk, dan ekspor spreadsheet XLSX Barang Masuk. |
+
+> **Catatan Pengujian Akun Terkunci (isLocked):**  
+> Admin dapat menguji fitur pembatasan akun terkunci secara langsung melalui menu **Manajemen User** dengan menekan tombol kunci/gembok. Akun pengguna yang berstatus terkunci akan langsung ditolak saat mencoba login (HTTP 403 Forbidden).
 
 ---
 
@@ -49,7 +50,7 @@ docker compose ps
 Akses layanan di dev mode:
 - **Frontend App**: [http://localhost:8080](http://localhost:8080) (atau http://localhost:5173 jika dijalankan via npm dev lokal)
 - **Backend API**: [http://localhost:3000](http://localhost:3000) (Health check: `http://localhost:3000/api/health`)
-- **MariaDB Database**: `localhost:3306` (User: `arrg_user`, Database: `arrg_inventory`)
+- **MariaDB Database**: `localhost:3306` (User: `jmc_user`, Database: `jmc_inventory`)
 
 ---
 
@@ -58,7 +59,7 @@ Akses layanan di dev mode:
 #### A. Clone Repository
 ```bash
 git clone https://github.com/edwinsamodra/jmc-inventory-mgmt.git
-cd arrg
+cd jmc-inventory-mgmt
 ```
 
 #### B. Menjalankan Database
@@ -71,6 +72,7 @@ docker compose up -d mariadb
 cd backend
 cp .env.example .env
 npm install
+npm run db:seed   # Menanam data awal: 1 Admin, 1 Operator, Master Data, & Transaksi
 npm run dev
 ```
 
