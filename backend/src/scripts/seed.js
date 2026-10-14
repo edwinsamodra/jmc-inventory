@@ -47,7 +47,7 @@ const initialBarangMasuk = [
     isVerified: true,
     totalHarga: 2200000,
     items: [
-      { namaBarang: 'Kertas HVS A4 80gr PaperOne', harga: 55000, jumlah: 40, satuan: 'Rim', total: 2200000, expiredDate: null }
+      { namaBarang: 'Kertas HVS A4 80gr PaperOne', harga: 55000, jumlah: 40, satuan: 'Rim', total: 2200000, expiredDate: null, isVerified: true }
     ]
   },
   {
@@ -63,7 +63,26 @@ const initialBarangMasuk = [
     isVerified: false,
     totalHarga: 11500000,
     items: [
-      { namaBarang: 'Laptop ASUS ExpertBook B1400 i5', harga: 11500000, jumlah: 1, satuan: 'Unit', total: 11500000, expiredDate: null }
+      { namaBarang: 'Laptop ASUS ExpertBook B1400 i5', harga: 11500000, jumlah: 1, satuan: 'Unit', total: 11500000, expiredDate: null, isVerified: false }
+    ]
+  },
+  {
+    id: 3,
+    nomorSurat: 'SRT/2026/04/003',
+    tanggal: '2026-04-13',
+    tahun: '2026',
+    asalBarang: 'CV Sinar Jaya Stationery',
+    kategoriId: 1,
+    subKategoriId: 2,
+    operatorId: 2,
+    lampiranName: 'tanda_terima_atk.docx',
+    isVerified: true,
+    totalHarga: 1800000,
+    items: [
+      { namaBarang: 'Pulpen Gel Pilot G2 0.5 Hitam', harga: 18000, jumlah: 40, satuan: 'Pcs', total: 720000, expiredDate: null, isVerified: true },
+      { namaBarang: 'Buku Agenda Kerja Hardcover A5', harga: 45000, jumlah: 15, satuan: 'Buku', total: 675000, expiredDate: null, isVerified: true },
+      { namaBarang: 'Spidol Whiteboard Snowman Boardmarker', harga: 11000, jumlah: 30, satuan: 'Pcs', total: 330000, expiredDate: null, isVerified: true },
+      { namaBarang: 'Sticky Notes Post-it 3x3 Neon', harga: 15000, jumlah: 5, satuan: 'Pad', total: 75000, expiredDate: null, isVerified: true }
     ]
   }
 ];
@@ -124,7 +143,8 @@ export async function runMigrationAndSeed() {
         jumlah: item.jumlah,
         satuan: item.satuan,
         total: item.total,
-        expiredDate: item.expiredDate
+        expiredDate: item.expiredDate,
+        isVerified: item.isVerified !== undefined ? item.isVerified : bm.isVerified
       });
     }
   }
